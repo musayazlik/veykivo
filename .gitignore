@@ -1,0 +1,11 @@
+.env
+.env.local
+node_modules/
+.next/
+bin/
+obj/
+backend/Veykivo.Api/wwwroot/uploads/
+*.user
+.vs/
+.idea/
+.DS_Store

@@ -1,0 +1,44 @@
+# Yerel geliştirme: API container'ı mevcut global Postgres ağına bağlanır.
+# Kullanım: docker compose up -d --build api   (frontend için: cd frontend && npm run dev)
+# Tam yığın:  docker compose --profile full up -d --build
+services:
+  api:
+    build: ./backend
+    container_name: veykivo-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: ${DB_CONNECTION}
+      Seed__AdminEmail: ${ADMIN_EMAIL}
+      Seed__AdminPassword: ${ADMIN_PASSWORD}
+      Database__MigrateOnStartup: "true"
+      Security__SecureCookies: "false"
+    ports:
+      - "127.0.0.1:5080:8080"
+    volumes:
+      - veykivo-data:/data
+    networks: [postgres]
+    restart: unless-stopped
+
+  web:
+    profiles: [full]
+    build:
+      context: ./frontend
+      args:
+        API_INTERNAL_URL: http://api:8080
+    container_name: veykivo-web
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on: [api]
+    networks: [postgres]
+    restart: unless-stopped
+
+volumes:
+  veykivo-data:
+
+networks:
+  postgres:
+    name: global-postgres_default
+    external: true

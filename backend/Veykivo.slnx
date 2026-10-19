@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Veykivo.Api/Veykivo.Api.csproj" />
+  <Project Path="Veykivo.Application/Veykivo.Application.csproj" />
+  <Project Path="Veykivo.Domain/Veykivo.Domain.csproj" />
+  <Project Path="Veykivo.Infrastructure/Veykivo.Infrastructure.csproj" />
+  <Project Path="Veykivo.Tests/Veykivo.Tests.csproj" />
+</Solution>
