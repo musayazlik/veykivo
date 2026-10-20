@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/etiket/[slug
 
 export default function TagArchivePage(props: PageProps<"/blog/etiket/[slug]">) {
   return (
-    <Suspense fallback={<div className="container-x pt-[calc(var(--header-h)+3.5rem)] pb-24"><PostGridSkeleton /></div>}>
+    <Suspense fallback={<div className="page-body"><div className="landing-shell"><PostGridSkeleton /></div></div>}>
       <TagArchive params={props.params} searchParams={props.searchParams} />
     </Suspense>
   );
@@ -44,12 +44,14 @@ async function TagArchive({ params, searchParams }: Pick<PageProps<"/blog/etiket
         lead={`“${tag.name}” etiketiyle işaretlenmiş ${tag.postCount} yazı.`}
         crumbs={[{ label: "Blog", href: "/blog" }, { label: tag.name }]}
       />
-      <section className="container-x pb-24">
-        <BlogNav categories={categories} />
-        <div className="mt-12">
-          <PostGrid posts={result.items} />
+      <section className="page-body">
+        <div className="landing-shell">
+          <BlogNav categories={categories} />
+          <div className="mt-14">
+            <PostGrid posts={result.items} />
+          </div>
+          <BlogPagination page={page} totalPages={result.totalPages ?? 0} basePath={`/blog/etiket/${slug}`} />
         </div>
-        <BlogPagination page={page} totalPages={result.totalPages ?? 0} basePath={`/blog/etiket/${slug}`} />
       </section>
     </>
   );

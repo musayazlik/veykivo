@@ -132,19 +132,23 @@ public sealed class OpenRouterClient(HttpClient http, IOptions<OpenRouterOptions
         if (string.IsNullOrWhiteSpace(content)) throw new AiUnavailableException("Model boş yanıt döndürdü. Başka bir model deneyin.");
 
         // Web eklentisi ve Perplexity kaynakları "url_citation" açıklamalarıyla döner; aynı adres bir kez sayılır.
+        // Yalnızca http(s) adresleri kabul edilir; markdown'a başka şema (ör. javascript:) sızmasın.
         var citations = new List<AiCitation>();
         foreach (var a in message?["annotations"]?.AsArray() ?? [])
         {
             var c = a?["url_citation"];
             var url = c?["url"]?.GetValue<string>();
-            if (url is null || citations.Any(x => x.Url == url)) continue;
+            if (url is null || !IsHttpUrl(url) || citations.Any(x => x.Url == url)) continue;
             citations.Add(new AiCitation(c?["title"]?.GetValue<string>() ?? url, url));
         }
-        foreach (var url in json["citations"]?.AsArray().Select(x => x?.GetValue<string>()).OfType<string>() ?? [])
+        foreach (var url in json["citations"]?.AsArray().Select(x => x?.GetValue<string>()).OfType<string>().Where(IsHttpUrl) ?? [])
             if (citations.All(x => x.Url != url)) citations.Add(new AiCitation(url, url));
 
         return new AiChatResult(content, citations, json["model"]?.GetValue<string>() ?? request.Model);
     }
+
+    private static bool IsHttpUrl(string url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";
 
     public async Task<AiImageResult> GenerateImageAsync(string model, string prompt, CancellationToken ct)
     {
@@ -159,8 +163,20 @@ public sealed class OpenRouterClient(HttpClient http, IOptions<OpenRouterOptions
         if (dataUrl is null || !dataUrl.StartsWith("data:", StringComparison.Ordinal))
             throw new AiUnavailableException("Model görsel döndürmedi. Görsel üretebilen bir model seçin.");
 
+        // Sağlayıcı biçimi garanti etmez; bozuk data-URL planlanmış 503 olarak dönmeli, 500 değil.
         var comma = dataUrl.IndexOf(',');
-        var mime = dataUrl[5..dataUrl.IndexOf(';')];
-        return new AiImageResult(Convert.FromBase64String(dataUrl[(comma + 1)..]), mime);
+        if (comma <= 5 || comma + 1 >= dataUrl.Length)
+            throw new AiUnavailableException("Model beklenen biçimde bir görsel döndürmedi.");
+        var mime = dataUrl[5..comma].Split(';', 2)[0].ToLowerInvariant();
+        if (mime is not ("image/png" or "image/jpeg" or "image/webp"))
+            throw new AiUnavailableException($"Model desteklenmeyen bir görsel biçimi döndürdü: {mime}");
+        try
+        {
+            return new AiImageResult(Convert.FromBase64String(dataUrl[(comma + 1)..]), mime);
+        }
+        catch (FormatException)
+        {
+            throw new AiUnavailableException("Model bozuk bir görsel döndürdü.");
+        }
     }
 }

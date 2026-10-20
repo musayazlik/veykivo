@@ -70,7 +70,9 @@ public sealed class BlogTests : IClassFixture<TestApp>
 
         var created = await visitor.PostAsJsonAsync("/api/v1/posts/yorum-testi/comments", new { authorName = "Ayşe", body = "Faydalı bir yazı olmuş." });
         Assert.Equal(HttpStatusCode.Accepted, created.StatusCode);
-        await visitor.PostAsJsonAsync("/api/v1/posts/yorum-testi/comments", new { authorName = "Bot", body = "spam", website = "http://spam" });
+        // Honeypot doluysa diğer alanlar geçersiz olsa bile doğrulama hatası dönmez; bot sessizce kabul edilir.
+        var bot = await visitor.PostAsJsonAsync("/api/v1/posts/yorum-testi/comments", new { authorName = "Bot", body = "", website = "http://spam" });
+        Assert.Equal(HttpStatusCode.Accepted, bot.StatusCode);
 
         var before = await visitor.GetFromJsonAsync<JsonElement>("/api/v1/posts/yorum-testi");
         Assert.Equal(0, before.GetProperty("commentCount").GetInt32());

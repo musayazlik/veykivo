@@ -12,6 +12,10 @@ services:
       Seed__AdminPassword: ${ADMIN_PASSWORD}
       Database__MigrateOnStartup: "true"
       Security__SecureCookies: "false"
+      # --profile full'da web container'ı proxy görevi görür; gerçek istemci IP'si (rate limit)
+      # için Docker iç ağına güvenilir. api host tarafında yalnız 127.0.0.1'e yayınlandığından bu
+      # güvenlidir; portu dışarı açarsanız bu değeri daraltın. Ağ 172.16/12 dışındaysa boş bırakın.
+      ForwardedHeaders__KnownNetworks: "172.16.0.0/12"
     ports:
       - "127.0.0.1:5080:8080"
     volumes:

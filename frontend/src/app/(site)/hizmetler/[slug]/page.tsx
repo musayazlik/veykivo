@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { ContentImage } from "@/components/site/content-image";
 import { Markdown } from "@/components/site/markdown";
 import { ServiceIcon } from "@/components/site/service-icon";
-import { ActionLink } from "@/components/site/action-link";
 import { DetailSkeleton } from "@/components/site/detail-skeleton";
 import { getService, getServices, slugParams } from "@/lib/api/content";
 import { quoteHref, siteUrl } from "@/lib/site";
@@ -67,59 +67,56 @@ async function ServiceDetail({ params }: Pick<PageProps<"/hizmetler/[slug]">, "p
         lead={service.summary}
         crumbs={[{ label: "Hizmetlerimiz", href: "/hizmetler" }, { label: service.title }]}
       >
-        <div className="mt-9 flex flex-wrap gap-3">
-          <ActionLink href={quoteHref} size="lg">
-            Bu hizmet için teklif al
-          </ActionLink>
+        <div className="page-hero-actions">
+          <Link href={quoteHref} className="landing-button landing-button-light">
+            Bu hizmet için teklif al <span><ArrowUpRight aria-hidden /></span>
+          </Link>
         </div>
       </PageHero>
 
-      <div className="container-x">
+      <div className="landing-shell pb-4">
         <ContentImage
           media={service.coverImage}
           sizes="100vw"
           priority
-          className="notch aspect-[16/9] md:aspect-[21/9]"
+          className="rounded-2xl aspect-[16/9] md:aspect-[21/9]"
           fallbackLabel={service.title}
         />
       </div>
 
-      <section className="container-x grid gap-14 py-16 md:py-24 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <Markdown>{service.body}</Markdown>
-        </div>
-
-        <aside className="lg:col-span-4 lg:col-start-9">
-          <div className="notch notch-sm sticky top-[calc(var(--header-h)+1.5rem)] bg-ink p-7 text-on-ink">
-            <ServiceIcon name={service.icon} className="size-8 text-signal" />
-            <h2 className="mt-5 text-h3">Projeniz için yol haritası çıkaralım</h2>
-            <p className="mt-3 text-on-ink-muted">
-              İhtiyacınızı anlatın, kapsamı ve tahmini süreyi içeren bir öneri hazırlayalım.
-            </p>
-            <ActionLink href={quoteHref} className="mt-6 w-full">
-              Teklif al
-            </ActionLink>
+      <section className="page-body">
+        <div className="landing-shell grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-7">
+            <Markdown>{service.body}</Markdown>
           </div>
 
-          {others.length > 0 && (
-            <nav aria-label="Diğer hizmetler" className="mt-10">
-              <h2 className="font-semibold text-ink">Diğer hizmetler</h2>
-              <ul className="mt-3 divide-y divide-line border-y border-line">
-                {others.map((s) => (
-                  <li key={s.slug}>
-                    <Link
-                      href={`/hizmetler/${s.slug}`}
-                      className="flex items-center gap-3 py-3 text-ink/85 transition-colors hover:text-ink"
-                    >
-                      <ServiceIcon name={s.icon} className="size-4 text-teal" />
-                      {s.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
-        </aside>
+          <aside className="lg:col-span-4 lg:col-start-9">
+            <div className="landing-panel sticky top-[calc(var(--header-h)+1.5rem)]">
+              <ServiceIcon name={service.icon} className="size-8 text-[#a1b7ff]" />
+              <h2 className="mt-5 text-[1.35rem] leading-snug tracking-[-0.02em]">Projeniz için yol haritası çıkaralım</h2>
+              <p>İhtiyacınızı anlatın, kapsamı ve tahmini süreyi içeren bir öneri hazırlayalım.</p>
+              <Link href={quoteHref} className="landing-button landing-button-light mt-7 w-full justify-between">
+                Teklif al <span><ArrowUpRight aria-hidden /></span>
+              </Link>
+            </div>
+
+            {others.length > 0 && (
+              <nav aria-label="Diğer hizmetler" className="mt-10">
+                <h2 className="text-[0.7rem] font-semibold tracking-[0.08em] text-[#878da0] uppercase">Diğer hizmetler</h2>
+                <ul className="landing-side-list mt-3">
+                  {others.map((s) => (
+                    <li key={s.slug}>
+                      <Link href={`/hizmetler/${s.slug}`}>
+                        <ServiceIcon name={s.icon} className="size-4 text-[#6a7ba6]" />
+                        {s.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+          </aside>
+        </div>
       </section>
     </>
   );

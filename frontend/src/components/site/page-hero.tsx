@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Crumb = { label: string; href?: string };
 
+/** İç sayfaların koyu hero'su: ana sayfadaki ritmi (nokta ızgara + büyük tipografi) taşır. */
 export function PageHero({
   title,
   lead,
@@ -18,29 +18,21 @@ export function PageHero({
   className?: string;
 }) {
   return (
-    <section className={cn("relative overflow-hidden pt-[calc(var(--header-h)+3.5rem)] pb-14 md:pb-20", className)}>
-      <div
-        aria-hidden
-        className="blueprint pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
-      />
-      <div className="container-x relative">
+    <section className={cn("page-hero", className)}>
+      <div className="page-hero-glow" aria-hidden="true" />
+      <div className="landing-shell relative">
         {crumbs.length > 0 && (
-          <nav aria-label="Konum" className="mb-8">
-            <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+          <nav aria-label="Konum">
+            <ol className="page-crumb">
               <li>
-                <Link href="/" className="hover:text-ink">
-                  Ana sayfa
-                </Link>
+                <Link href="/">Ana sayfa</Link>
               </li>
               {crumbs.map((c) => (
-                <li key={c.label} className="flex items-center gap-1.5">
-                  <ChevronRight aria-hidden className="size-3.5" />
+                <li key={c.label}>
                   {c.href ? (
-                    <Link href={c.href} className="hover:text-ink">
-                      {c.label}
-                    </Link>
+                    <Link href={c.href}>{c.label}</Link>
                   ) : (
-                    <span aria-current="page" className="text-ink">
+                    <span aria-current="page" className="text-[#c9cddd]">
                       {c.label}
                     </span>
                   )}
@@ -49,9 +41,9 @@ export function PageHero({
             </ol>
           </nav>
         )}
-        <div className="hero-rise max-w-4xl">
-          <h1 className="text-h1 text-ink">{title}</h1>
-          {lead && <p className="mt-6 max-w-2xl text-lead text-muted-foreground">{lead}</p>}
+        <div className="hero-rise">
+          <h1>{title}</h1>
+          {lead && <p className="page-lead">{lead}</p>}
           {children}
         </div>
       </div>

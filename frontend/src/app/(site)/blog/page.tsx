@@ -17,14 +17,16 @@ export default async function BlogPage(props: PageProps<"/blog">) {
   return (
     <>
       <PageHero
-        title="Blog"
+        title="Notlarımızdan"
         lead="Projelerimizden öğrendiklerimizi, karar vermenizi kolaylaştıracak pratik yazılara dönüştürüyoruz."
         crumbs={[{ label: "Blog" }]}
       />
-      <section className="container-x pb-24">
-        <Suspense fallback={<><BlogNav categories={categories} /><div className="mt-12"><PostGridSkeleton /></div></>}>
-          <BlogListing searchParams={props.searchParams} categories={categories} />
-        </Suspense>
+      <section className="page-body">
+        <div className="landing-shell">
+          <Suspense fallback={<><BlogNav categories={categories} /><div className="mt-14"><PostGridSkeleton /></div></>}>
+            <BlogListing searchParams={props.searchParams} categories={categories} />
+          </Suspense>
+        </div>
       </section>
     </>
   );
@@ -51,18 +53,18 @@ async function BlogListing({
     <>
       <BlogNav categories={categories} search={q} />
       {q && (
-        <p className="mt-8 text-muted-foreground" role="status">
+        <p className="mt-8 text-[14px] text-[#646a7c]" role="status">
           “{q}” için {result.totalCount} sonuç bulundu.
         </p>
       )}
       {hero && (
-        <div className="mt-14 mb-20">
+        <div className="mt-16 mb-20">
           <FeaturedPost post={hero} />
         </div>
       )}
-      <div className="mt-12">
+      <div className="mt-14">
         {items.length === 0 && !hero ? (
-          <p className="border-t border-line py-10 text-muted-foreground">
+          <p className="landing-empty">
             {q ? "Aramanıza uyan yazı bulunamadı. Farklı bir kelime deneyin." : "Bu sayfada henüz yazı yok."}
           </p>
         ) : (

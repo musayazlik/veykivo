@@ -134,9 +134,15 @@ public sealed class ApiTests : IClassFixture<TestApp>
         {
             name = "Bot", email = "bot@spam.com", message = "spam spam spam spam spam spam", consent = true, website = "http://spam",
         });
+        // Honeypot doluysa diğer alanlar geçersiz olsa bile doğrulama hatası dönmez; bot sessizce kabul edilir.
+        var invalidBot = await client.PostAsJsonAsync("/api/v1/inquiries", new
+        {
+            name = "", email = "gecersiz", message = "kısa", consent = false, website = "http://spam",
+        });
 
         Assert.Equal(HttpStatusCode.Accepted, valid.StatusCode);
         Assert.Equal(HttpStatusCode.Accepted, bot.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, invalidBot.StatusCode);
 
         using var scope = _app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { ContentImage } from "@/components/site/content-image";
 import { CtaBand } from "@/components/site/cta-band";
@@ -21,37 +22,42 @@ export default async function TeamPage() {
         crumbs={[{ label: "Kurumsal" }, { label: "Ekibimiz" }]}
       />
 
-      <section className="container-x pb-8">
-        {team.length === 0 ? (
-          <p className="border-t border-line py-10 text-muted-foreground">Ekip bilgileri yakında yayınlanacak.</p>
-        ) : (
-          <ul className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((m, i) => (
-              <li key={m.id}>
-                <ContentImage
-                  media={m.photo}
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  priority={i < 4}
-                  className="notch notch-sm aspect-[4/5] grayscale-[35%]"
-                  fallbackLabel={m.name}
-                />
-                <h2 className="mt-5 text-[1.25rem] font-bold text-ink">{m.name}</h2>
-                <p className="font-medium text-teal">{m.roleTitle}</p>
-                {m.bio && <p className="mt-3 text-[0.975rem] text-muted-foreground">{m.bio}</p>}
-                {m.linkedInUrl && (
-                  <a
-                    href={m.linkedInUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-block text-sm font-semibold text-ink underline-offset-4 hover:underline"
-                  >
-                    LinkedIn profili<span className="sr-only">: {m.name}</span>
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+      <section className="page-body">
+        <div className="landing-shell">
+          {team.length === 0 ? (
+            <p className="landing-empty">Ekip bilgileri yakında yayınlanacak.</p>
+          ) : (
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {team.map((m, i) => (
+                <li key={m.id} className="landing-card">
+                  <ContentImage
+                    media={m.photo}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    priority={i < 4}
+                    className="landing-card-media aspect-[4/5] grayscale-[35%]"
+                    fallbackLabel={m.name}
+                  />
+                  <div className="landing-card-body">
+                    <h3>{m.name}</h3>
+                    <p className="!mt-1.5 text-[13.5px] font-medium !text-[#5a6fd8]">{m.roleTitle}</p>
+                    {m.bio && <p className="!mt-3 text-[13.5px]">{m.bio}</p>}
+                    {m.linkedInUrl && (
+                      <a
+                        href={m.linkedInUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="landing-card-link !mt-5 !text-[#3d56c9]"
+                      >
+                        LinkedIn profili <ArrowUpRight aria-hidden />
+                        <span className="sr-only">: {m.name}</span>
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       <CtaBand title="Ekibimizle tanışmak ister misiniz?" />

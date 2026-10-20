@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { ContentImage } from "@/components/site/content-image";
 import { DetailSkeleton } from "@/components/site/detail-skeleton";
@@ -10,6 +10,7 @@ import { CtaBand } from "@/components/site/cta-band";
 import { getProject, getProjects, slugParams } from "@/lib/api/content";
 import { technologyCategoryLabels } from "@/lib/api/types";
 import { formatDate } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 export function generateStaticParams() {
   return slugParams("project");
@@ -64,82 +65,80 @@ async function ProjectDetail({ params }: Pick<PageProps<"/projeler/[slug]">, "pa
         crumbs={[{ label: "Projelerimiz", href: "/projeler" }, { label: project.title }]}
       />
 
-      <div className="container-x">
+      <div className="landing-shell pb-4">
         <ContentImage
           media={project.coverImage}
           sizes="100vw"
           priority
-          className="notch aspect-[16/9] md:aspect-[21/9]"
+          className="rounded-2xl aspect-[16/9] md:aspect-[21/9]"
           fallbackLabel={project.title}
         />
       </div>
 
-      <section className="container-x grid gap-14 py-16 md:py-24 lg:grid-cols-12">
-        <aside className="lg:col-span-3">
-          <dl className="space-y-6 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
-            {project.clientName && (
-              <div>
-                <dt className="text-sm text-muted-foreground">Müşteri</dt>
-                <dd className="mt-1 font-semibold text-ink">{project.clientName}</dd>
-              </div>
-            )}
-            {project.sector && (
-              <div>
-                <dt className="text-sm text-muted-foreground">Sektör</dt>
-                <dd className="mt-1 font-semibold text-ink">{project.sector}</dd>
-              </div>
-            )}
-            {project.publishedAt && (
-              <div>
-                <dt className="text-sm text-muted-foreground">Yayın</dt>
-                <dd className="mt-1 font-semibold text-ink">{formatDate(project.publishedAt)}</dd>
-              </div>
-            )}
-            {project.technologies.length > 0 && (
-              <div>
-                <dt className="text-sm text-muted-foreground">Teknolojiler</dt>
-                <dd className="mt-2 flex flex-wrap gap-2">
-                  {project.technologies.map((t) => (
-                    <span
-                      key={t.id}
-                      title={technologyCategoryLabels[t.category]}
-                      className="rounded-sm border border-line bg-white px-2.5 py-1 text-sm text-ink/85"
-                    >
-                      {t.name}
-                    </span>
-                  ))}
-                </dd>
-              </div>
-            )}
-          </dl>
-        </aside>
+      <section className="page-body">
+        <div className="landing-shell grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <aside className="lg:col-span-3">
+            <dl className="landing-meta lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+              {project.clientName && (
+                <div>
+                  <dt>Müşteri</dt>
+                  <dd>{project.clientName}</dd>
+                </div>
+              )}
+              {project.sector && (
+                <div>
+                  <dt>Sektör</dt>
+                  <dd>{project.sector}</dd>
+                </div>
+              )}
+              {project.publishedAt && (
+                <div>
+                  <dt>Yayın</dt>
+                  <dd>{formatDate(project.publishedAt)}</dd>
+                </div>
+              )}
+              {project.technologies.length > 0 && (
+                <div>
+                  <dt>Teknolojiler</dt>
+                  <dd className="mt-2.5 flex flex-wrap gap-2">
+                    {project.technologies.map((t) => (
+                      <span key={t.id} title={technologyCategoryLabels[t.category]} className="landing-chip landing-chip-sm">
+                        {t.name}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </aside>
 
-        <div className="lg:col-span-8 lg:col-start-5">
-          {story.map((block) => (
-            <section key={block.title} className="grid gap-4 border-t border-line py-10 first:border-t-0 first:pt-0 md:grid-cols-[9rem_1fr]">
-              <h2 className="text-h3 text-teal">{block.title}</h2>
-              <p className="text-[1.125rem] leading-[1.75] text-ink/85 whitespace-pre-line">{block.text}</p>
-            </section>
-          ))}
+          <div className="lg:col-span-8 lg:col-start-5">
+            {story.map((block, i) => (
+              <section
+                key={block.title}
+                className={cn("grid gap-3 border-t border-[#e0e3ee] py-9 md:grid-cols-[8rem_1fr] md:gap-8", i === 0 && "border-t-0 pt-0")}
+              >
+                <h2 className="pt-1.5 text-[0.7rem] font-semibold tracking-[0.08em] text-[#878da0] uppercase">{block.title}</h2>
+                <p className="text-[1.05rem] leading-[1.8] whitespace-pre-line text-[#3c4150]">{block.text}</p>
+              </section>
+            ))}
+          </div>
         </div>
-      </section>
 
-      {next && (
-        <section className="border-t border-line bg-white">
-          <div className="container-x flex flex-wrap items-center justify-between gap-6 py-12">
-            <Link href="/projeler" className="inline-flex items-center gap-2 font-medium text-ink/75 hover:text-ink">
-              <ArrowLeft aria-hidden className="size-4" />
-              Tüm projeler
+        {next && (
+          <div className="landing-shell mt-4 flex flex-wrap items-center justify-between gap-6 border-t border-[#e0e3ee] pt-10">
+            <Link href="/projeler" className="landing-dark-link">
+              <ArrowLeft aria-hidden className="rotate-180" /> Tüm projeler
             </Link>
             <Link href={`/projeler/${next.slug}`} className="group text-right">
-              <span className="block text-sm text-muted-foreground">Sonraki proje</span>
-              <span className="text-[1.5rem] font-bold tracking-[-0.02em] text-ink group-hover:underline group-hover:underline-offset-4">
-                {next.title}
+              <span className="block text-[11px] tracking-[0.04em] text-[#878da0] uppercase">Sonraki proje</span>
+              <span className="mt-1 inline-flex items-center gap-2 text-[1.35rem] font-medium tracking-[-0.03em] text-[#171922] group-hover:text-[#3d56c9]">
+                {next.title} <ArrowUpRight aria-hidden className="size-5" />
               </span>
             </Link>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       <CtaBand />
     </>

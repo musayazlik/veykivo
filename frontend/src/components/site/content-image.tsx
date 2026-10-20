@@ -24,15 +24,15 @@ export function ContentImage({
       <div
         role="img"
         aria-label={fallbackLabel ?? "Görsel eklenmedi"}
-        className={cn("blueprint relative flex items-center justify-center bg-mist", className)}
+        className={cn("blueprint relative flex items-center justify-center bg-[#e3e7ef]", className)}
       >
-        <span className="text-sm text-muted-foreground">{fallbackLabel ?? "Görsel"}</span>
+        <span className="text-sm text-[#878da0]">{fallbackLabel ?? "Görsel"}</span>
       </div>
     );
   }
 
   return (
-    <div className={cn("relative overflow-hidden bg-mist", className)}>
+    <div className={cn("relative overflow-hidden bg-[#e3e7ef]", className)}>
       <Image
         src={media.url}
         alt={media.altText}

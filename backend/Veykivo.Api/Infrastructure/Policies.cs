@@ -11,4 +11,5 @@ public static class RateLimitPolicies
     public const string Login = "login";
     public const string Comment = "comment";
     public const string Ai = "ai";
+    public const string Health = "health";
 }

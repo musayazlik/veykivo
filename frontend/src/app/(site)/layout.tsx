@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SiteHeader, SiteHeaderFallback } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import "@/components/site/landing.css";
 
 export default function SiteLayout({ children }: LayoutProps<"/">) {
   return (
@@ -9,7 +10,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       <Suspense fallback={<SiteHeaderFallback />}>
         <SiteHeader />
       </Suspense>
-      <main id="icerik" className="flex-1">
+      <main id="icerik" className="landing-page flex-1">
         {children}
       </main>
       <SiteFooter />

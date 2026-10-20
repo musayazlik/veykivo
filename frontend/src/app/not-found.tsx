@@ -10,7 +10,7 @@ export default function RootNotFound() {
       <Suspense fallback={<SiteHeaderFallback />}>
         <SiteHeader />
       </Suspense>
-      <main id="icerik" className="flex-1">
+      <main id="icerik" className="landing-page flex-1">
         <NotFound />
       </main>
       <SiteFooter />

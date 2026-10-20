@@ -250,6 +250,8 @@ public sealed partial class AiBlogService(
             Absolutely no text, letters, numbers, logos or watermarks.
             """;
         var image = await ai.GenerateImageAsync(model, prompt, ct);
+        if (image.Bytes.LongLength > MediaService.MaxBytes)
+            throw new AiUnavailableException($"Model çok büyük bir görsel döndürdü (en fazla {MediaService.MaxBytes / (1024 * 1024)} MB).");
         var extension = image.MimeType switch { "image/png" => ".png", "image/webp" => ".webp", _ => ".jpg" };
         if (!MediaService.HasValidSignature(image.Bytes.AsSpan(0, Math.Min(image.Bytes.Length, 32)), image.MimeType))
             throw new AiUnavailableException("Model geçerli bir görsel döndürmedi.");

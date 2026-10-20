@@ -4,15 +4,14 @@ import type { BlogCategory, PostListItem } from "@/lib/api/types";
 import { ContentImage } from "../content-image";
 import { CategoryBadge, PostCard, PostMeta } from "../post-card";
 import { RevealMask } from "../reveal";
-import { cn } from "@/lib/utils";
 
 /** Kategori şeridi ve arama: blog ana sayfası ve arşiv sayfalarında ortak. */
 export function BlogNav({ categories, active, search }: { categories: BlogCategory[]; active?: string; search?: string }) {
   const total = categories.reduce((sum, c) => sum + c.postCount, 0);
   return (
-    <div className="flex flex-col gap-4 border-y border-line py-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
       <nav aria-label="Blog kategorileri" className="-mx-1 overflow-x-auto">
-        <ul className="flex gap-1.5 px-1 whitespace-nowrap">
+        <ul className="flex gap-2 px-1 whitespace-nowrap">
           <li>
             <Chip href="/blog" active={!active}>
               Tümü <span className="text-xs opacity-60 tabular-nums">{total}</span>
@@ -30,14 +29,14 @@ export function BlogNav({ categories, active, search }: { categories: BlogCatego
         </ul>
       </nav>
       <form action="/blog" role="search" className="relative w-full lg:w-72">
-        <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search aria-hidden className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[#9aa0b0]" />
         <input
           type="search"
           name="ara"
           defaultValue={search}
           placeholder="Yazılarda ara"
           aria-label="Yazılarda ara"
-          className="h-11 w-full rounded-full border border-input bg-white pr-4 pl-10 text-[0.95rem] outline-none transition-[border-color,box-shadow] focus:border-teal focus:ring-3 focus:ring-teal/20"
+          className="landing-input landing-input-pill pr-4 pl-11"
         />
       </form>
     </div>
@@ -46,14 +45,7 @@ export function BlogNav({ categories, active, search }: { categories: BlogCatego
 
 function Chip({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "inline-flex h-9 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition-colors",
-        active ? "border-ink bg-ink text-on-ink" : "border-line bg-white text-ink/80 hover:border-ink/40 hover:text-ink",
-      )}
-    >
+    <Link href={href} aria-current={active ? "page" : undefined} className="landing-chip">
       {children}
     </Link>
   );
@@ -62,22 +54,22 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
 /** Öne çıkan yazı: blogun ilk sayfasında, listenin üstünde geniş kart. */
 export function FeaturedPost({ post }: { post: PostListItem }) {
   return (
-    <article className="group relative grid items-center gap-8 md:grid-cols-12 md:gap-12">
+    <article className="group relative grid items-center gap-10 md:grid-cols-12 md:gap-14">
       <RevealMask className="md:col-span-7">
-        <ContentImage media={post.coverImage} sizes="(min-width: 768px) 58vw, 100vw" priority className="notch aspect-[16/10]" fallbackLabel={post.title} />
+        <ContentImage media={post.coverImage} sizes="(min-width: 768px) 58vw, 100vw" priority className="rounded-2xl aspect-[16/10]" fallbackLabel={post.title} />
       </RevealMask>
       <div className="md:col-span-5">
-        <p className="inline-flex items-center gap-2 rounded-full bg-signal/20 px-3 py-1 text-sm font-semibold text-ink">Öne çıkan yazı</p>
+        <p className="inline-flex items-center gap-2 rounded-full bg-[#141722] px-3.5 py-1.5 text-[11px] font-semibold text-[#f5f6fb]">Öne çıkan yazı</p>
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1">
           {post.category && <CategoryBadge category={post.category} />}
           <PostMeta post={post} />
         </div>
-        <h2 className="mt-3 text-h2 text-ink">
-          <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4">
+        <h2 className="mt-3 text-[clamp(24px,2.4vw,36px)] leading-[1.2] tracking-[-0.03em]">
+          <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 hover:text-[#3d56c9]">
             {post.title}
           </Link>
         </h2>
-        <p className="mt-4 text-lead text-muted-foreground">{post.excerpt}</p>
+        <p className="mt-4 text-[15px] leading-[1.8] text-[#626a7c]">{post.excerpt}</p>
       </div>
     </article>
   );
@@ -85,7 +77,7 @@ export function FeaturedPost({ post }: { post: PostListItem }) {
 
 export function PostGrid({ posts }: { posts: PostListItem[] }) {
   return (
-    <div className="grid gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="landing-insights-grid">
       {posts.map((post) => (
         <PostCard key={post.slug} post={post} headingLevel="h2" />
       ))}
@@ -102,17 +94,9 @@ export function BlogPagination({ page, totalPages, basePath, params = {} }: { pa
     return q.size ? `${basePath}?${q}` : basePath;
   };
   return (
-    <nav aria-label="Sayfalama" className="mt-16 flex items-center justify-center gap-2">
+    <nav aria-label="Sayfalama" className="landing-pagination">
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-        <Link
-          key={n}
-          href={href(n)}
-          aria-current={n === page ? "page" : undefined}
-          className={cn(
-            "flex size-11 items-center justify-center rounded-md border font-semibold transition-colors",
-            n === page ? "border-ink bg-ink text-on-ink" : "border-line bg-white text-ink hover:border-ink",
-          )}
-        >
+        <Link key={n} href={href(n)} aria-current={n === page ? "page" : undefined}>
           {n}
         </Link>
       ))}
@@ -122,12 +106,12 @@ export function BlogPagination({ page, totalPages, basePath, params = {} }: { pa
 
 export function PostGridSkeleton() {
   return (
-    <div aria-busy="true" className="grid animate-pulse gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+    <div aria-busy="true" className="landing-insights-grid animate-pulse">
       {Array.from({ length: 3 }, (_, i) => (
         <div key={i}>
-          <div className="aspect-[16/10] rounded-sm bg-mist" />
-          <div className="mt-5 h-4 w-32 rounded bg-mist" />
-          <div className="mt-3 h-6 w-4/5 rounded bg-mist" />
+          <div className="h-[220px] rounded-xl bg-[#e3e7ef]" />
+          <div className="mt-5 h-3.5 w-32 rounded bg-[#e3e7ef]" />
+          <div className="mt-3 h-6 w-4/5 rounded bg-[#e3e7ef]" />
         </div>
       ))}
     </div>

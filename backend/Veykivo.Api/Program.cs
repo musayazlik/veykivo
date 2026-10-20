@@ -96,12 +96,28 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy(RateLimitPolicies.Ai, http => RateLimitPartition.GetFixedWindowLimiter(
         http.User.Identity?.Name ?? http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(10) }));
+    // /health her çağrıda veritabanına vurur; dışarıdan sonsuz istekle meşgul edilemesin.
+    o.AddPolicy(RateLimitPolicies.Health, http => RateLimitPartition.GetFixedWindowLimiter(
+        http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 60, Window = TimeSpan.FromMinutes(1) }));
 });
 
 // API yalnızca Next.js / ters proxy arkasında yayınlanır; gerçek istemci IP'si X-Forwarded-For'dan okunur.
 builder.Services.Configure<ForwardedHeadersOptions>(o => TrustedProxyConfiguration.Configure(o, builder.Configuration));
 
 var app = builder.Build();
+
+// Proxy güven listesi boşsa gerçek istemci IP'si okunamaz ve IP bazlı rate limit'ler
+// ters proxy arkasında tüm kullanıcılar için tek kovada toplanır; yanlış yapılandırmayı görünür kıl.
+if (!app.Environment.IsDevelopment())
+{
+    var proxies = app.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [];
+    var networks = app.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [];
+    if (proxies.Length + networks.Length == 0)
+        app.Logger.LogWarning("ForwardedHeaders:KnownProxies/KnownNetworks boş; ters proxy arkasında IP bazlı rate limit'ler tek kovada toplanır.");
+}
+
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
@@ -141,7 +157,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").RequireRateLimiting(RateLimitPolicies.Health);
 app.MapPublicEndpoints();
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();

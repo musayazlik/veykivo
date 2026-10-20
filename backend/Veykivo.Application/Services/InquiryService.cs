@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Veykivo.Application.Abstractions;
@@ -12,11 +13,13 @@ public sealed class InquiryService(
     IAppDbContext db,
     IEmailSender email,
     TimeProvider clock,
+    IValidator<CreateInquiryRequest> createValidator,
     ILogger<InquiryService> logger)
 {
     /// <summary>
     /// Talebi önce veritabanına yazar; bildirim e-postası başarısız olsa bile kayıt korunur.
-    /// Honeypot dolu gelirse kayıt yapılmadan başarılı yanıt verilir (bota ipucu vermemek için).
+    /// Honeypot dolu gelirse doğrulamaya geçilmeden kayıt yapılmadan başarılı yanıt verilir
+    /// (bota hangi alanların denetlendiği bilgisini verecek 400 dönülmez).
     /// </summary>
     public async Task<InquiryCreatedDto> CreateAsync(CreateInquiryRequest r, CancellationToken ct)
     {
@@ -25,6 +28,7 @@ public sealed class InquiryService(
             logger.LogInformation("Honeypot alanı dolu bir talep yok sayıldı.");
             return new InquiryCreatedDto(null);
         }
+        await createValidator.ValidateAndThrowAsync(r, ct);
 
         var now = clock.GetUtcNow();
         var inquiry = new Inquiry

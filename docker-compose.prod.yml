@@ -1,0 +1,56 @@
+# Üretim örneği. .env dosyasını doldurun (bkz. .env.example) ve ardından:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# docker-compose.yml'den farkları:
+#   - ASPNETCORE_ENVIRONMENT=Production → Swagger/OpenAPI kapalı, HSTS açık.
+#   - Security__SecureCookies=true → auth/CSRF cookie'leri yalnız HTTPS'te gönderilir.
+#   - api hiçbir host portuna yayınlanmaz; yalnız web (Next.js) iç ağdan erişir.
+#     Bu yüzden rate limit'in gerçek istemci IP'sini görmesi için ForwardedHeaders
+#     iç Docker ağına güvenecek şekilde ayarlıdır.
+services:
+  api:
+    build: ./backend
+    container_name: veykivo-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: ${DB_CONNECTION}
+      Seed__AdminEmail: ${ADMIN_EMAIL}
+      Seed__AdminPassword: ${ADMIN_PASSWORD}
+      Database__MigrateOnStartup: "true"
+      Security__SecureCookies: "true"
+      # API yalnız bu iç ağdan erişilebilir olduğundan proxy olarak bu ağa güvenilir.
+      # Docker'ın atadığı alt ağ 172.16/12 dışındaysa FORWARD_NETWORKS ile eşleştirin
+      # (docker network inspect <ağ> | grep Subnet).
+      ForwardedHeaders__KnownNetworks: ${FORWARD_NETWORKS:-172.16.0.0/12}
+      OpenRouter__ApiKey: ${OPENROUTER_API_KEY:-}
+      Smtp__Host: ${SMTP_HOST:-}
+      Smtp__Port: ${SMTP_PORT:-587}
+      Smtp__Username: ${SMTP_USERNAME:-}
+      Smtp__Password: ${SMTP_PASSWORD:-}
+      Smtp__From: ${SMTP_FROM:-no-reply@veykivo.com}
+    volumes:
+      - veykivo-data:/data
+    networks: [internal]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        API_INTERNAL_URL: http://api:8080
+    container_name: veykivo-web
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:-https://veykivo.com}
+    ports:
+      # TLS'i sonlandıran ters proxy'niz (nginx/Caddy/Traefik) buradan almalı.
+      - "127.0.0.1:3000:3000"
+    depends_on: [api]
+    networks: [internal]
+    restart: unless-stopped
+
+volumes:
+  veykivo-data:
+
+networks:
+  internal:

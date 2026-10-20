@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CircleCheck, LoaderCircle } from "lucide-react";
-import { actionVariants } from "./action-link";
 import type { Problem } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
@@ -72,16 +71,16 @@ export function InquiryForm({ services }: { services: string[] }) {
 
   if (status === "sent") {
     return (
-      <div role="status" className="notch bg-ink p-8 text-on-ink md:p-10">
-        <CircleCheck aria-hidden className="size-10 text-signal" />
-        <h3 className="mt-5 text-h3">Talebiniz bize ulaştı.</h3>
-        <p className="mt-3 max-w-md text-on-ink-muted">
+      <div role="status" className="landing-panel p-8 md:p-10">
+        <CircleCheck aria-hidden className="size-10 text-[#a1b7ff]" />
+        <h3 className="mt-5 text-[1.35rem] tracking-[-0.02em]">Talebiniz bize ulaştı.</h3>
+        <p className="max-w-md">
           Ekibimiz talebinizi inceleyip en geç bir iş günü içinde e-posta veya telefonla size dönüş yapacak.
         </p>
         <button
           type="button"
           onClick={() => setStatus("idle")}
-          className="mt-8 font-semibold text-signal underline-offset-4 hover:underline"
+          className="mt-8 text-[13px] font-semibold text-[#a1b7ff] underline-offset-4 hover:underline"
         >
           Yeni bir talep gönder
         </button>
@@ -134,37 +133,37 @@ export function InquiryForm({ services }: { services: string[] }) {
       </Field>
 
       <div className="sm:col-span-2">
-        <label className="flex items-start gap-3 text-[0.95rem]">
+        <label className="flex items-start gap-3 text-[14px] leading-relaxed">
           <input
             type="checkbox"
-            className="mt-1 size-5 shrink-0 accent-(--teal)"
+            className="mt-1 size-5 shrink-0 accent-[#5a6fd8]"
             aria-invalid={Boolean(errors.consent)}
             aria-describedby={errors.consent ? "consent-error" : undefined}
             {...register("consent")}
           />
-          <span className="text-ink/85">
+          <span className="text-[#3c4150]">
             Kişisel verilerimin talebime dönüş yapılması amacıyla işlenmesine ilişkin{" "}
-            <Link href="/kvkk" target="_blank" className="font-medium text-teal underline underline-offset-3">
+            <Link href="/kvkk" target="_blank" className="font-medium text-[#3d56c9] underline underline-offset-3">
               KVKK aydınlatma metnini
             </Link>{" "}
             okudum.
           </span>
         </label>
         {errors.consent && (
-          <p id="consent-error" className="mt-2 text-sm text-destructive">
+          <p id="consent-error" className="mt-2 text-[13px] text-[#b44848]">
             {errors.consent.message}
           </p>
         )}
       </div>
 
       {formError && (
-        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive sm:col-span-2">
+        <p role="alert" className="rounded-xl border border-[#e5b4b4] bg-[#fdf1f1] px-4 py-3 text-[14px] text-[#b44848] sm:col-span-2">
           {formError}
         </p>
       )}
 
       <div className="sm:col-span-2">
-        <button type="submit" disabled={isSubmitting} className={cn(actionVariants({ size: "lg" }), "w-full sm:w-auto")}>
+        <button type="submit" disabled={isSubmitting} className={cn("landing-btn-solid w-full sm:w-auto")}>
           {isSubmitting && <LoaderCircle aria-hidden className="animate-spin" />}
           {isSubmitting ? "Gönderiliyor" : "Talebi gönder"}
         </button>
@@ -200,12 +199,12 @@ function Field({
   const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1.5 block text-[0.95rem] font-medium text-ink">
+      <label htmlFor={id} className="mb-1.5 block text-[14px] font-medium text-[#3c4150]">
         {label}
-        {required ? <span className="text-destructive"> *</span> : <span className="font-normal text-muted-foreground"> (isteğe bağlı)</span>}
+        {required ? <span className="text-[#c25555]"> *</span> : <span className="font-normal text-[#878da0]"> (isteğe bağlı)</span>}
       </label>
       {hint && (
-        <p id={`${id}-hint`} className="mb-2 text-sm text-muted-foreground">
+        <p id={`${id}-hint`} className="mb-2 text-[13px] text-[#878da0]">
           {hint}
         </p>
       )}
@@ -214,11 +213,10 @@ function Field({
         "aria-invalid": Boolean(error),
         "aria-describedby": describedBy,
         required,
-        className:
-          "block w-full rounded-md border border-input bg-white px-3.5 py-2.5 text-base text-ink transition-[border-color,box-shadow] outline-none placeholder:text-muted-foreground focus:border-teal focus:ring-3 focus:ring-teal/20 aria-invalid:border-destructive aria-invalid:ring-destructive/15",
+        className: "landing-input",
       })}
       {error && (
-        <p id={`${id}-error`} className="mt-1.5 text-sm text-destructive">
+        <p id={`${id}-error`} className="mt-1.5 text-[13px] text-[#b44848]">
           {error}
         </p>
       )}

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Schibsted_Grotesk } from "next/font/google";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
+import "@/components/site/landing.css";
 
 const schibsted = Schibsted_Grotesk({
   variable: "--font-schibsted",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e2a2f",
+  themeColor: "#08090d",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

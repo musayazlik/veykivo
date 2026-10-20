@@ -21,12 +21,14 @@ public sealed class CommentService(
 {
     public async Task<CommentCreatedDto> CreateAsync(string postSlug, CreateCommentRequest r, CancellationToken ct)
     {
-        await createValidator.ValidateAndThrowAsync(r, ct);
+        // Honeypot doğrulamadan önce kontrol edilir; bot geçersiz form alanları yüzünden 400 alıp
+        // hangi alanların denetlendiğini öğrenemesin, sessizce başarı yanıtı almaya devam etsin.
         if (!string.IsNullOrWhiteSpace(r.Website))
         {
             logger.LogInformation("Honeypot alanı dolu bir yorum yok sayıldı.");
             return new CommentCreatedDto(true);
         }
+        await createValidator.ValidateAndThrowAsync(r, ct);
 
         var now = clock.GetUtcNow();
         var postId = await db.Posts.AsNoTracking()

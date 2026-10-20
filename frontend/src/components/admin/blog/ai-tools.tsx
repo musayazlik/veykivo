@@ -146,12 +146,11 @@ function ModelRow({ selected, onClick, title, sub, meta, free }: { selected: boo
 
 // ------------------------------------------------------------------ Yazı üretme
 
-type Fields = { title: boolean; excerpt: boolean; content: boolean; seo: boolean; category: boolean; tags: boolean; cover: boolean };
+type Fields = { title: boolean; excerpt: boolean; content: boolean; category: boolean; tags: boolean; cover: boolean };
 const fieldLabels: { key: keyof Fields; label: string }[] = [
   { key: "title", label: "Başlık" },
   { key: "excerpt", label: "Özet" },
   { key: "content", label: "İçerik" },
-  { key: "seo", label: "SEO başlığı ve açıklaması" },
   { key: "category", label: "Kategori önerisi" },
   { key: "tags", label: "Etiket önerileri" },
   { key: "cover", label: "Kapak görseli" },
@@ -171,7 +170,7 @@ export function AiGenerateDialog({
   const models = useAiModels(open);
   const defaults = models.data?.defaults;
   const [topic, setTopic] = useState("");
-  const [fields, setFields] = useState<Fields>({ title: true, excerpt: true, content: true, seo: true, category: true, tags: true, cover: false });
+  const [fields, setFields] = useState<Fields>({ title: true, excerpt: true, content: true, category: true, tags: true, cover: false });
   const [style, setStyle] = useState<string | null>(null);
   const [depth, setDepth] = useState<string | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
@@ -213,7 +212,8 @@ export function AiGenerateDialog({
         adminApi.POST("/api/v1/admin/ai/generate-post", {
           body: {
             topic,
-            fields,
+            // Panelde SEO alanları bulunmadığı için sunucudaki seo alanı her zaman kapalı istenir.
+            fields: { ...fields, seo: false },
             style: style ?? defaults?.style ?? null,
             depth: depth ?? defaults?.depth ?? null,
             language: language ?? defaults?.language ?? null,
@@ -406,7 +406,6 @@ function AiResultPreview({ result }: { result: AiGenerateResult }) {
         {result.title && <PreviewRow label="Başlık" value={result.title} />}
         {result.excerpt && <PreviewRow label="Özet" value={result.excerpt} />}
         {result.content && <PreviewRow label="İçerik" value={`${words} kelime, ${(result.content.match(/^## /gm) ?? []).length} alt başlık`} />}
-        {result.seoTitle && <PreviewRow label="SEO başlığı" value={result.seoTitle} />}
         {result.category && <PreviewRow label="Kategori" value={result.category} />}
         {result.tags.length > 0 && <PreviewRow label="Etiketler" value={result.tags.join(", ")} />}
         {result.sources.length > 0 && <PreviewRow label="Kaynaklar" value={`${result.sources.length} kaynak, kaynakça eklendi`} />}

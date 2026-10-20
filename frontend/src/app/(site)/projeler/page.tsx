@@ -20,16 +20,18 @@ export default async function ProjectsPage() {
         lead="Her proje bir iş problemiyle başladı. İhtiyacı, kurduğumuz çözümü ve sonrasında neyin değiştiğini anlatıyoruz."
         crumbs={[{ label: "Projelerimiz" }]}
       />
-      <section className="container-x pb-8">
-        {projects.length === 0 ? (
-          <p className="border-t border-line py-10 text-muted-foreground">Projeler yakında burada yayınlanacak.</p>
-        ) : (
-          <div className="space-y-20 md:space-y-28">
-            {projects.map((p, i) => (
-              <ProjectCase key={p.slug} project={p} flip={i % 2 === 1} headingLevel="h2" />
-            ))}
-          </div>
-        )}
+      <section className="page-body">
+        <div className="landing-shell">
+          {projects.length === 0 ? (
+            <p className="landing-empty">Yeni çalışmalarımızı yakında burada paylaşacağız.</p>
+          ) : (
+            <div className="landing-project-grid">
+              {projects.map((p) => (
+                <ProjectCase key={p.slug} project={p} headingLevel="h2" />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
       <CtaBand title="Sıradaki proje sizinki olabilir." />
     </>

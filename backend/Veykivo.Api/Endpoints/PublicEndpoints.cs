@@ -33,9 +33,11 @@ public static class PublicEndpoints
             .WithName("GetBlogCategories");
         api.MapGet("/blog/tags", (PublicContentService s, CancellationToken ct) => s.GetBlogTagsAsync(ct))
             .WithName("GetBlogTags");
+        // Doğrulama filtresi yerine servis katmanında yapılır: honeypot dolu istekler
+        // alan hataları almadan sessizce kabul edilsin (CommentService/InquiryService).
         api.MapPost("/posts/{slug}/comments", async (string slug, CreateCommentRequest request, CommentService s, CancellationToken ct) =>
                 TypedResults.Accepted((string?)null, await s.CreateAsync(slug, request, ct)))
-            .Validate<CreateCommentRequest>()
+            .ProducesValidationProblem()
             .RequireRateLimiting(RateLimitPolicies.Comment)
             .ProducesProblem(404)
             .WithName("CreateComment");
@@ -52,7 +54,7 @@ public static class PublicEndpoints
                 var created = await s.CreateAsync(request, ct);
                 return TypedResults.Accepted((string?)null, created);
             })
-            .Validate<CreateInquiryRequest>()
+            .ProducesValidationProblem()
             .RequireRateLimiting(RateLimitPolicies.Inquiry)
             .WithName("CreateInquiry");
 

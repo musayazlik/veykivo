@@ -1,212 +1,156 @@
-import { JsonLd } from "@/components/site/json-ld";
 import Link from "next/link";
-import { Check } from "lucide-react";
-import { ActionLink } from "@/components/site/action-link";
-import { SystemDiagram } from "@/components/site/system-diagram";
-import { ServicesIndex } from "@/components/site/services-index";
-import { ProjectCase } from "@/components/site/project-case";
-import { ProcessTimeline } from "@/components/site/process-timeline";
-import { PostCard } from "@/components/site/post-card";
-import { CtaBand } from "@/components/site/cta-band";
+import Image from "next/image";
+import { ArrowDown, ArrowUpRight, Check, Code2, GitBranch, Layers3, Workflow } from "lucide-react";
+import { JsonLd } from "@/components/site/json-ld";
+import { HeroArtwork } from "@/components/site/hero-artwork";
+import { LandingMotion } from "@/components/site/landing-motion";
+import { ServiceIcon } from "@/components/site/service-icon";
 import { getPosts, getProjects, getServices, getSiteSettings, getTechnologies } from "@/lib/api/content";
-import { technologyCategoryLabels, type Technology, type TechnologyCategory } from "@/lib/api/types";
-import { quoteHref, siteUrl } from "@/lib/site";
+import { homepageImages } from "@/lib/homepage-images";
+import { formatDate, quoteHref, siteUrl } from "@/lib/site";
 
 export async function generateMetadata() {
   "use cache";
   const s = await getSiteSettings();
-  return {
-    title: { absolute: s.seoTitle },
-    description: s.seoDescription,
-    alternates: { canonical: "/" },
-  };
+  return { title: { absolute: s.seoTitle }, description: s.seoDescription, alternates: { canonical: "/" } };
 }
 
-const commitments = ["Kaynak kod ve veriler sizin", "İki haftada bir çalışan sürüm", "Yayından sonra da yanınızdayız"];
+const process = [
+  { title: "Önce sizi dinliyoruz.", body: "İşinizi, kullanıcılarınızı ve çözmek istediğiniz sorunu birlikte anlıyoruz.", icon: Layers3 },
+  { title: "Birlikte şekillendiriyoruz.", body: "Fikri somut bir yol haritasına ve deneyimleyebileceğiniz bir prototipe dönüştürüyoruz.", icon: GitBranch },
+  { title: "Adım adım geliştiriyoruz.", body: "Kısa geliştirme döngüleriyle ilerliyor, her aşamada çalışan ürünü sizinle paylaşıyoruz.", icon: Code2 },
+  { title: "Yolculuğa devam ediyoruz.", body: "Yayına alıyor, izliyor ve işiniz büyüdükçe ürününüzü birlikte geliştiriyoruz.", icon: Workflow },
+];
 
 export default async function HomePage() {
   const [services, projects, technologies, posts, settings] = await Promise.all([
-    getServices(),
-    getProjects({ featured: true, limit: 3 }),
-    getTechnologies(),
-    getPosts({ pageSize: 3 }),
-    getSiteSettings(),
+    getServices(), getProjects({ featured: true, limit: 2 }), getTechnologies(), getPosts({ page: 1, pageSize: 3 }), getSiteSettings(),
   ]);
-
-  const organizationJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: settings.companyName,
-    url: siteUrl,
-    logo: `${siteUrl}/icon.svg`,
-    email: settings.email || undefined,
-    telephone: settings.phone || undefined,
-    address: settings.address || undefined,
-    sameAs: settings.social.map((s) => s.href),
-  };
+  const techNames = technologies.filter((t) => ["Next.js", "React", ".NET", "PostgreSQL", "Docker", "AWS"].includes(t.name));
+  const projectCards = projects.map((project) => ({
+    ...project,
+    coverImage: homepageImages[project.coverImage?.url ?? ""] ?? project.coverImage,
+  }));
+  const postCards = posts.items.map((post) => ({
+    ...post,
+    coverImage: homepageImages[post.coverImage?.url ?? ""] ?? post.coverImage,
+  }));
 
   return (
     <>
-      <JsonLd data={organizationJsonLd} />
-
-      {/* Hero */}
-      <section className="relative overflow-hidden pt-[calc(var(--header-h)+2.5rem)] pb-20 md:pt-[calc(var(--header-h)+4rem)] md:pb-28">
-        <div
-          aria-hidden
-          className="blueprint pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_70%_40%,black_20%,transparent_70%)]"
-        />
-        <div className="container-x relative grid grid-cols-[minmax(0,1fr)] items-center gap-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-12">
-          <div className="hero-rise">
-            <h1 className="text-display text-ink">İşinizin nasıl yürüdüğünü yazılıma dönüştürüyoruz.</h1>
-            <p className="mt-7 max-w-xl text-lead text-muted-foreground">
-              Veykivo; sipariş, stok, saha ve finans süreçlerinizi tek bir sistemde buluşturan web, mobil ve ERP
-              çözümleri tasarlar, geliştirir ve yıllarca ayakta tutar.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <ActionLink href={quoteHref} size="lg">
-                Teklif al
-              </ActionLink>
-              <ActionLink href="/projeler" size="lg" variant="outline">
-                Projeleri incele
-              </ActionLink>
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", name: settings.companyName, url: siteUrl,
+        logo: `${siteUrl}/icon.svg`, email: settings.email || undefined, sameAs: settings.social.map((s) => s.href) }} />
+      <LandingMotion>
+        <section className="landing-hero" aria-labelledby="landing-title">
+          <div className="landing-hero-glow" aria-hidden="true" />
+          <div className="landing-shell landing-hero-inner">
+            <div className="landing-hero-copy">
+              <p className="landing-intro"><span /> Fikirden ürüne, aynı ekiple.</p>
+              <h1 id="landing-title">
+                {["İyi fikirler,", "güçlü yazılımlarla", "hayat bulur."].map((line, i) => (
+                  <span className="landing-title-line" key={line}><span style={{ animationDelay: `${i * 105}ms` }}>{line}</span></span>
+                ))}
+              </h1>
+              <p className="landing-hero-description">Karmaşık süreçleri sade deneyimlere dönüştürüyoruz. İşinize özel yazılımı strateji, tasarım ve mühendislikle bir araya getiriyoruz.</p>
+              <div className="landing-hero-actions">
+                <Link href={quoteHref} className="landing-button landing-button-light">Projenizi konuşalım <span><ArrowUpRight aria-hidden /></span></Link>
+                <Link href="#calismalar" className="landing-text-link">Neler yapıyoruz? <ArrowDown aria-hidden /></Link>
+              </div>
             </div>
-            <ul className="mt-12 flex flex-col gap-3 text-[0.95rem] text-ink/80 sm:flex-row sm:flex-wrap sm:gap-x-7">
-              {commitments.map((c) => (
-                <li key={c} className="flex items-center gap-2">
-                  <Check aria-hidden className="size-4 text-teal" strokeWidth={2.5} />
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <SystemDiagram className="mx-auto w-full max-w-[36rem] lg:mr-0" />
-          </div>
-        </div>
-      </section>
-
-      {/* Hizmetler */}
-      <section aria-labelledby="hizmetler-baslik" className="container-x py-20 md:py-28">
-        <div className="mb-12 grid gap-6 md:grid-cols-12 md:items-end">
-          <h2 id="hizmetler-baslik" className="text-h2 text-ink md:col-span-6">
-            Ne yapıyoruz
-          </h2>
-          <div className="md:col-span-5 md:col-start-8">
-            <p className="text-muted-foreground">
-              Tek bir uygulamadan uçtan uca dijital dönüşüme kadar, her işi aynı mühendislik disipliniyle ele alıyoruz.
-            </p>
-            <Link href="/hizmetler" className="mt-3 inline-block font-semibold text-teal underline-offset-4 hover:underline">
-              Tüm hizmetler
-            </Link>
-          </div>
-        </div>
-        <ServicesIndex services={services} />
-      </section>
-
-      {/* Projeler */}
-      {projects.length > 0 && (
-        <section aria-labelledby="projeler-baslik" className="border-t border-line bg-white py-20 md:py-28">
-          <div className="container-x">
-            <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
-              <h2 id="projeler-baslik" className="text-h2 text-ink">
-                Seçili projeler
-              </h2>
-              <ActionLink href="/projeler" variant="outline">
-                Tüm projeler
-              </ActionLink>
-            </div>
-            <div className="space-y-20 md:space-y-28">
-              {projects.map((p, i) => (
-                <ProjectCase key={p.slug} project={p} flip={i % 2 === 1} />
-              ))}
+            <HeroArtwork />
+            <div className="landing-hero-bottom">
+              <p>İşinizi anlayan bir ekip.<br /><span>Sizinle büyüyen bir teknoloji.</span></p>
+              <a href="#hizmetler" className="landing-scroll-link" aria-label="Hizmetleri keşfet"><span>Keşfetmek için kaydırın</span><ArrowDown aria-hidden /></a>
             </div>
           </div>
         </section>
-      )}
 
-      {/* Süreç */}
-      <section aria-labelledby="surec-baslik" className="blueprint-dark bg-ink py-20 text-on-ink md:py-28">
-        <div className="container-x">
-          <div className="mb-16 grid gap-6 md:grid-cols-12 md:items-end">
-            <h2 id="surec-baslik" className="text-h2 md:col-span-6">
-              Nasıl çalışıyoruz
-            </h2>
-            <p className="text-on-ink-muted md:col-span-5 md:col-start-8">
-              Sürprizsiz bir süreç: her aşamanın sonunda ne teslim edileceğini baştan biliyorsunuz.
-            </p>
-          </div>
-          <ProcessTimeline />
-        </div>
-      </section>
-
-      {/* Teknolojiler */}
-      {technologies.length > 0 && (
-        <section aria-labelledby="teknoloji-baslik" className="container-x py-20 md:py-28">
-          <div className="grid gap-10 md:grid-cols-12">
-            <div className="md:col-span-4">
-              <h2 id="teknoloji-baslik" className="text-h2 text-ink">
-                Teknoloji yığınımız
-              </h2>
-              <p className="mt-5 text-muted-foreground">
-                Moda olana değil, projenizin ömrü boyunca bakımı kolay ve iyi desteklenen araçlara yatırım yapıyoruz.
-              </p>
-              <Link
-                href="/teknolojiler"
-                className="mt-4 inline-block font-semibold text-teal underline-offset-4 hover:underline"
-              >
-                Teknolojileri incele
-              </Link>
-            </div>
-            <TechGroups technologies={technologies} className="md:col-span-7 md:col-start-6" />
+        <section className="landing-tech" aria-label="Kullandığımız teknolojiler">
+          <div className="landing-shell landing-tech-inner">
+            <p>Güçlü fikirlerin<br /><strong>sağlam bir temeli olur.</strong></p>
+            <div>{techNames.map((tech) => <span key={tech.id}>{tech.name}</span>)}</div>
           </div>
         </section>
-      )}
 
-      {/* Blog */}
-      {posts.items.length > 0 && (
-        <section aria-labelledby="blog-baslik" className="border-t border-line bg-white py-20 md:py-28">
-          <div className="container-x">
-            <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
-              <h2 id="blog-baslik" className="text-h2 text-ink">
-                Blogdan
-              </h2>
-              <ActionLink href="/blog" variant="outline">
-                Tüm yazılar
-              </ActionLink>
+        <section id="hizmetler" className="landing-services landing-light" aria-labelledby="services-title">
+          <div className="landing-shell">
+            <div className="landing-section-heading">
+              <div><p className="landing-kicker">Neler yapıyoruz?</p><h2 id="services-title">İşinizin bir sonraki adımı.<br />Birlikte tasarlayalım.</h2></div>
+              <p>Hazır kalıplara sığmayan fikirler için buradayız. İhtiyacınıza odaklanan, birbiriyle uyum içinde çalışan dijital çözümler geliştiriyoruz.</p>
             </div>
-            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
-              {posts.items.map((post) => (
-                <PostCard key={post.slug} post={post} />
+            <div className="landing-services-grid">
+              {services.slice(0, 6).map((service, i) => (
+                <Link className={`landing-service-card landing-service-${i % 3}`} href={`/hizmetler/${service.slug}`} key={service.slug}>
+                  <div className="landing-service-top"><ServiceIcon name={service.icon} className="size-6" /><ArrowUpRight className="landing-card-arrow" aria-hidden /></div>
+                  <div className="landing-service-illustration" aria-hidden="true"><span /><span /><span /><i /><i /></div>
+                  <h3>{service.title}</h3><p>{service.summary}</p>
+                  <span className="landing-card-link">Çözümü keşfedin <ArrowUpRight aria-hidden /></span>
+                </Link>
               ))}
             </div>
+            {services.length === 0 && <p className="landing-empty">Yeni çözümler üzerinde çalışıyoruz. İhtiyacınızı birlikte değerlendirelim.</p>}
           </div>
         </section>
-      )}
 
-      <CtaBand />
+        <section id="calismalar" className="landing-work" aria-labelledby="work-title">
+          <div className="landing-shell">
+            <div className="landing-section-heading">
+              <div><p className="landing-kicker">Seçili çalışmalar</p><h2 id="work-title">Fikirden fazlası.<br />Gerçek bir dönüşüm.</h2></div>
+              <Link href="/projeler" className="landing-outline-link">Tüm projeler <ArrowUpRight aria-hidden /></Link>
+            </div>
+            <div className="landing-project-grid">
+              {projectCards.map((project) => (
+                <Link href={`/projeler/${project.slug}`} className="landing-project-card" key={project.slug}>
+                  <div className="landing-project-media">
+                    {project.coverImage ? <Image src={project.coverImage.url} alt={project.coverImage.altText || project.title} fill sizes="(max-width: 760px) calc(100vw - 40px), (max-width: 1100px) 50vw, 760px" className="object-cover" /> : <div className="landing-project-fallback"><Code2 aria-hidden /></div>}
+                    <span className="landing-project-category">{project.sector || "Özel yazılım"}</span>
+                    <span className="landing-project-open"><ArrowUpRight aria-hidden /><span className="sr-only">Projeyi incele</span></span>
+                  </div>
+                  <div className="landing-project-info"><div><h3>{project.title}</h3><p>{project.summary}</p></div><span>{project.technologies.slice(0, 2).join(" / ")}</span></div>
+                </Link>
+              ))}
+            </div>
+            {projects.length === 0 && <p className="landing-empty">Yeni çalışmalarımızı yakında burada paylaşacağız.</p>}
+          </div>
+        </section>
+
+        <section className="landing-approach landing-light" aria-labelledby="approach-title">
+          <div className="landing-shell landing-approach-grid">
+            <div className="landing-approach-intro">
+              <p className="landing-kicker">Nasıl çalışıyoruz?</p><h2 id="approach-title">Aynı masada.<br />Aynı hedefe.</h2>
+              <p>Bir yazılım teslim etmekten fazlasına inanıyoruz. Doğru soruları soran, sorumluluk alan ve yol boyunca yanınızda olan bir teknoloji ortağıyız.</p>
+              <Link href="/kurumsal/hakkimizda" className="landing-dark-link">Veykivo’yu tanıyın <ArrowUpRight aria-hidden /></Link>
+              <div className="landing-team-image"><Image src="/images/home/team-collaboration.webp" alt="Aydınlık bir ofiste dizüstü bilgisayar ve arayüz taslakları üzerinde birlikte çalışan yazılım ekibi" fill sizes="(max-width: 760px) calc(100vw - 40px), (max-width: 1100px) 45vw, 640px" className="object-cover" /></div>
+            </div>
+            <ol className="landing-process">
+              {process.map((step, i) => <li key={step.title}><span className="landing-step-index">0{i + 1}</span><div><step.icon aria-hidden /><h3>{step.title}</h3><p>{step.body}</p></div></li>)}
+            </ol>
+          </div>
+        </section>
+
+        {posts.items.length > 0 && <section className="landing-insights landing-light" aria-labelledby="insights-title">
+          <div className="landing-shell">
+            <div className="landing-section-heading"><div><p className="landing-kicker">Notlarımızdan</p><h2 id="insights-title">Bakış açımızı paylaşıyoruz.</h2></div><Link href="/blog" className="landing-dark-link">Tüm yazılar <ArrowUpRight aria-hidden /></Link></div>
+            <div className="landing-insights-grid">
+              {postCards.map((post) => <Link href={`/blog/${post.slug}`} className="landing-post" key={post.slug}>
+                <div className="landing-post-image">{post.coverImage && <Image src={post.coverImage.url} alt={post.coverImage.altText || post.title} fill sizes="(max-width: 760px) calc(100vw - 40px), (max-width: 1100px) 33vw, 450px" className="object-cover" />}<ArrowUpRight aria-hidden /></div>
+                <p className="landing-post-meta"><time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time><span>{post.readingMinutes} dk okuma</span></p>
+                <h3>{post.title}</h3>
+              </Link>)}
+            </div>
+          </div>
+        </section>}
+
+        <section className="landing-contact" aria-labelledby="contact-title">
+          <div className="landing-contact-orbit" aria-hidden="true" />
+          <div className="landing-shell">
+            <p className="landing-kicker">Sıradaki iyi fikir sizin olabilir.</p><h2 id="contact-title">Birlikte bir şeyler<br />değiştirelim.</h2>
+            <p>Bir fikriniz, bir sorunuz ya da çözülmeyi bekleyen bir süreciniz mi var?<br className="hidden sm:block" /> İlk adımı birlikte atalım.</p>
+            <Link href={quoteHref} className="landing-button landing-button-light">Tanışalım <span><ArrowUpRight aria-hidden /></span></Link>
+            <div className="landing-contact-notes"><span><Check aria-hidden /> Önce ihtiyacınızı anlarız</span><span><Check aria-hidden /> Birlikte yol haritası çıkarırız</span></div>
+          </div>
+        </section>
+      </LandingMotion>
     </>
-  );
-}
-
-function TechGroups({ technologies, className }: { technologies: Technology[]; className?: string }) {
-  const groups = technologies.reduce(
-    (acc, t) => ((acc[t.category] ??= []).push(t), acc),
-    {} as Partial<Record<TechnologyCategory, Technology[]>>,
-  );
-  return (
-    <dl className={className}>
-      {(Object.keys(technologyCategoryLabels) as TechnologyCategory[]).filter((c) => groups[c]).map((cat) => (
-        <div key={cat} className="grid gap-3 border-t border-line py-5 sm:grid-cols-[11rem_1fr]">
-          <dt className="font-semibold text-ink">{technologyCategoryLabels[cat]}</dt>
-          <dd className="flex flex-wrap gap-2">
-            {groups[cat]!.map((t) => (
-              <span key={t.id} className="rounded-sm border border-line bg-white px-3 py-1 text-[0.95rem] text-ink/85">
-                {t.name}
-              </span>
-            ))}
-          </dd>
-        </div>
-      ))}
-    </dl>
   );
 }

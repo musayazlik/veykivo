@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { ContentImage } from "@/components/site/content-image";
 import { ServiceIcon } from "@/components/site/service-icon";
@@ -24,37 +25,47 @@ export default async function ServicesPage() {
         crumbs={[{ label: "Hizmetlerimiz" }]}
       />
 
-      <section className="container-x pb-8">
-        {services.length === 0 ? (
-          <p className="border-t border-line py-10 text-muted-foreground">Hizmetler yakında burada listelenecek.</p>
-        ) : (
-          <ul className="grid gap-x-10 gap-y-16 md:grid-cols-2">
-            {services.map((s, i) => (
-              <li key={s.slug} className="group relative">
-                <ContentImage
-                  media={s.coverImage}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  priority={i < 2}
-                  className="notch aspect-[16/10] transition-[filter] duration-500 group-hover:brightness-95"
-                  fallbackLabel={s.title}
-                />
-                <div className="mt-6 flex items-start gap-4">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-ink text-signal">
-                    <ServiceIcon name={s.icon} className="size-5" />
-                  </span>
-                  <div>
-                    <h2 className="text-[1.6rem] leading-tight font-bold tracking-[-0.02em] text-ink">
-                      <Link href={`/hizmetler/${s.slug}`} className="after:absolute after:inset-0 group-hover:underline group-hover:underline-offset-4">
-                        {s.title}
-                      </Link>
-                    </h2>
-                    <p className="mt-2 text-muted-foreground">{s.summary}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+      <section className="page-body">
+        <div className="landing-shell">
+          <div className="landing-section-heading">
+            <div>
+              <p className="landing-kicker">Çözümlerimiz</p>
+              <h2>Bir sonraki adımınızı<br />birlikte tasarlayalım.</h2>
+            </div>
+            <p>İhtiyacınıza odaklanan, birbiriyle uyum içinde çalışan dijital çözümler geliştiriyoruz.</p>
+          </div>
+
+          {services.length === 0 ? (
+            <p className="landing-empty">Yeni çözümler üzerinde çalışıyoruz. İhtiyacınızı birlikte değerlendirelim.</p>
+          ) : (
+            <ul className="grid gap-5 md:grid-cols-2">
+              {services.map((s, i) => (
+                <li key={s.slug}>
+                  <Link href={`/hizmetler/${s.slug}`} className="landing-card group block h-full">
+                    <ContentImage
+                      media={s.coverImage}
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      priority={i < 2}
+                      className="landing-card-media aspect-[16/9]"
+                      fallbackLabel={s.title}
+                    />
+                    <div className="landing-card-body">
+                      <div className="flex items-start justify-between gap-4">
+                        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e9edf9] text-[#53638d]">
+                          <ServiceIcon name={s.icon} className="size-5" />
+                        </span>
+                        <ArrowUpRight className="landing-card-arrow" aria-hidden />
+                      </div>
+                      <h3 className="mt-5">{s.title}</h3>
+                      <p className="flex-1">{s.summary}</p>
+                      <span className="landing-card-link">Çözümü keşfedin <ArrowUpRight aria-hidden /></span>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       <CtaBand

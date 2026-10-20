@@ -1,6 +1,8 @@
-import { ActionLink } from "./action-link";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { quoteHref } from "@/lib/site";
 
+/** Sayfaların kapanışındaki koyu CTA bandı; ana sayfanın iletişim bölümüyle aynı dilde. */
 export function CtaBand({
   title = "Projenizi 30 dakikalık bir görüşmede konuşalım.",
   text = "İhtiyacınızı dinliyor, size uygun yaklaşımı ve kabaca bir yol haritasını aynı görüşmede paylaşıyoruz. Bağlayıcı değil, ücretsiz.",
@@ -9,29 +11,19 @@ export function CtaBand({
   text?: string;
 }) {
   return (
-    <section className="container-x py-20 md:py-28">
-      <div className="notch blueprint-dark relative overflow-hidden bg-ink px-6 py-14 text-on-ink sm:px-12 md:px-16 md:py-20">
-        <svg
-          aria-hidden
-          viewBox="0 0 400 200"
-          className="pointer-events-none absolute -right-10 -bottom-10 w-[28rem] text-on-ink/10 md:right-0"
-        >
-          <path d="M20 180 L120 60 L220 140 L320 30" fill="none" stroke="currentColor" strokeWidth="2" />
-          <circle cx="120" cy="60" r="7" fill="currentColor" />
-          <circle cx="220" cy="140" r="7" fill="currentColor" />
-          <circle cx="320" cy="30" r="9" fill="var(--signal)" />
-        </svg>
-        <div className="relative max-w-2xl">
-          <h2 className="text-h2">{title}</h2>
-          <p className="mt-5 text-lead text-on-ink-muted">{text}</p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <ActionLink href={quoteHref} size="lg">
-              Teklif al
-            </ActionLink>
-            <ActionLink href="/projeler" size="lg" variant="outline-light">
-              Projeleri incele
-            </ActionLink>
-          </div>
+    <section className="landing-contact landing-contact--band" aria-labelledby="cta-title">
+      <div className="landing-contact-orbit" aria-hidden="true" />
+      <div className="landing-shell">
+        <p className="landing-kicker">Sıradaki adım.</p>
+        <h2 id="cta-title">{title}</h2>
+        <p>{text}</p>
+        <div className="flex flex-wrap justify-center gap-5">
+          <Link href={quoteHref} className="landing-button landing-button-light">
+            Tanışalım <span><ArrowUpRight aria-hidden /></span>
+          </Link>
+          <Link href="/projeler" className="landing-outline-link">
+            Projeleri incele <ArrowUpRight aria-hidden />
+          </Link>
         </div>
       </div>
     </section>

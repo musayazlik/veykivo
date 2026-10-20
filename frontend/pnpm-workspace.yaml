@@ -1,0 +1,7 @@
+allowBuilds:
+  unrs-resolver: set this to true or false
+minimumReleaseAgeExclude:
+  - '@hookform/resolvers@6.0.0'
+  - framer-motion@14.4.0
+  - motion-dom@14.4.0
+  - motion@14.4.0

@@ -88,98 +88,99 @@ async function PostDetail({ params }: Pick<PageProps<"/blog/[slug]">, "params">)
     <>
       <JsonLd data={jsonLd} />
       <article>
-        <header className="container-x pt-[calc(var(--header-h)+3.5rem)] pb-12">
-          <div className="mx-auto max-w-3xl">
-            <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-ink">
-              <ArrowLeft aria-hidden className="size-4" />
-              Tüm yazılar
-            </Link>
-            <div className="hero-rise">
-              <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-1">
-                {post.category && <CategoryBadge category={post.category} />}
-                <PostMeta post={post} />
+        <header className="page-hero page-hero--article">
+          <div className="page-hero-glow" aria-hidden="true" />
+          <div className="landing-shell">
+            <div className="mx-auto max-w-3xl">
+              <Link href="/blog" className="landing-back-link">
+                <ArrowLeft aria-hidden /> Tüm yazılar
+              </Link>
+              <div className="hero-rise">
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+                  {post.category && <CategoryBadge category={post.category} className="text-[#a9b7e8] hover:text-white" />}
+                  <PostMeta post={post} className="text-[#9aa3ba]" />
+                </div>
+                <h1 className="mt-5">{post.title}</h1>
+                <p className="page-lead">{post.excerpt}</p>
+                <p className="mt-8 flex items-center gap-3.5">
+                  <span aria-hidden className="grid size-10 place-items-center rounded-full bg-[#141722] text-[15px] font-semibold text-[#a1b7ff]">
+                    {(post.authorName ?? "V").charAt(0)}
+                  </span>
+                  <span>
+                    <span className="block text-[14px] font-semibold text-[#e8eaf3]">{post.authorName ?? "Veykivo Editör"}</span>
+                    <span className="block text-[12px] text-[#747a8f]">Veykivo</span>
+                  </span>
+                </p>
               </div>
-              <h1 className="mt-4 text-h1 text-ink">{post.title}</h1>
-              <p className="mt-6 text-lead text-muted-foreground">{post.excerpt}</p>
-              <p className="mt-6 flex items-center gap-3 text-sm">
-                <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-ink font-bold text-signal">
-                  {(post.authorName ?? "V").charAt(0)}
-                </span>
-                <span>
-                  <span className="block font-semibold text-ink">{post.authorName ?? "Veykivo Editör"}</span>
-                  <span className="block text-muted-foreground">Veykivo</span>
-                </span>
-              </p>
             </div>
           </div>
         </header>
 
-        <div className="container-x">
-          <ContentImage
-            media={post.coverImage}
-            sizes="(min-width: 1280px) 1200px, 100vw"
-            priority
-            className="notch mx-auto aspect-[16/9] max-w-5xl"
-            fallbackLabel={post.title}
-          />
-        </div>
+        <div className="page-body">
+          <div className="landing-shell">
+            <ContentImage
+              media={post.coverImage}
+              sizes="(min-width: 1280px) 1200px, 100vw"
+              priority
+              className="mx-auto aspect-[16/9] max-w-5xl rounded-2xl"
+              fallbackLabel={post.title}
+            />
 
-        <div className="container-x grid gap-16 py-16 md:py-20 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-14 xl:max-w-[72rem]">
-          <div className="min-w-0">
-            <Markdown className="max-w-3xl text-[1.125rem] leading-[1.8]">{post.bodyMarkdown}</Markdown>
+            <div className="mx-auto mt-16 grid max-w-5xl gap-16 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-14">
+              <div className="min-w-0">
+                <Markdown className="max-w-3xl text-[1.05rem]">{post.bodyMarkdown}</Markdown>
 
-            {post.tags.length > 0 && (
-              <ul aria-label="Etiketler" className="mt-12 flex max-w-3xl flex-wrap gap-2 border-t border-line pt-6">
-                {post.tags.map((t) => (
-                  <li key={t.slug}>
-                    <Link
-                      href={`/blog/etiket/${t.slug}`}
-                      className="inline-flex items-center gap-1 rounded-full border border-line bg-white py-1 pr-3 pl-2 text-sm text-ink/85 transition-colors hover:border-ink/40 hover:text-ink"
-                    >
-                      <Hash aria-hidden className="size-3.5 text-muted-foreground" />
-                      {t.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                {post.tags.length > 0 && (
+                  <ul aria-label="Etiketler" className="mt-14 flex max-w-3xl flex-wrap gap-2 border-t border-[#e0e3ee] pt-7">
+                    {post.tags.map((t) => (
+                      <li key={t.slug}>
+                        <Link href={`/blog/etiket/${t.slug}`} className="landing-chip landing-chip-sm">
+                          <Hash aria-hidden className="size-3.5 text-[#9aa0b0]" />
+                          {t.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            <CommentsSection postSlug={post.slug} comments={post.comments} count={post.commentCount} />
+                <CommentsSection postSlug={post.slug} comments={post.comments} count={post.commentCount} />
+              </div>
+
+              <aside className="space-y-10 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
+                {categories.length > 0 && (
+                  <nav aria-label="Kategoriler">
+                    <h2 className="text-[0.7rem] font-semibold tracking-[0.08em] text-[#878da0] uppercase">Kategoriler</h2>
+                    <ul className="landing-side-list mt-3">
+                      {categories.map((c) => (
+                        <li key={c.slug}>
+                          <Link href={`/blog/kategori/${c.slug}`}>
+                            <span aria-hidden className="size-2 rounded-full" style={{ background: c.color }} />
+                            <span className="flex-1">{c.name}</span>
+                            <span className="text-[13px] text-[#878da0] tabular-nums">{c.postCount}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                )}
+                {others.length > 0 && (
+                  <nav aria-label="Son yazılar">
+                    <h2 className="text-[0.7rem] font-semibold tracking-[0.08em] text-[#878da0] uppercase">Son yazılar</h2>
+                    <ul className="mt-3">
+                      {others.map((p) => (
+                        <li key={p.slug} className="border-t border-[#ebedf5] first:border-t-0">
+                          <Link href={`/blog/${p.slug}`} className="group block py-3.5">
+                            <span className="block text-[14px] leading-snug font-semibold text-[#2a2e3c] group-hover:text-[#3d56c9]">{p.title}</span>
+                            <span className="mt-1 block text-[12px] text-[#878da0]">{formatDate(p.publishedAt)}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                )}
+              </aside>
+            </div>
           </div>
-
-          <aside className="space-y-10 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
-            {categories.length > 0 && (
-              <nav aria-label="Kategoriler">
-                <h2 className="font-bold text-ink">Kategoriler</h2>
-                <ul className="mt-3 divide-y divide-line border-y border-line">
-                  {categories.map((c) => (
-                    <li key={c.slug}>
-                      <Link href={`/blog/kategori/${c.slug}`} className="flex items-center gap-2.5 py-2.5 text-[0.95rem] text-ink/85 hover:text-ink">
-                        <span aria-hidden className="size-2 rounded-full" style={{ background: c.color }} />
-                        <span className="flex-1">{c.name}</span>
-                        <span className="text-sm text-muted-foreground tabular-nums">{c.postCount}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-            {others.length > 0 && (
-              <nav aria-label="Son yazılar">
-                <h2 className="font-bold text-ink">Son yazılar</h2>
-                <ul className="mt-3 space-y-4">
-                  {others.map((p) => (
-                    <li key={p.slug}>
-                      <Link href={`/blog/${p.slug}`} className="group block">
-                        <span className="block leading-snug font-semibold text-ink group-hover:underline group-hover:underline-offset-4">{p.title}</span>
-                        <span className="mt-1 block text-sm text-muted-foreground">{formatDate(p.publishedAt)}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-          </aside>
         </div>
       </article>
 

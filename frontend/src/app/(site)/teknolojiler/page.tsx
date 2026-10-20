@@ -35,31 +35,30 @@ export default async function TechnologiesPage() {
         crumbs={[{ label: "Teknolojilerimiz" }]}
       />
 
-      <section className="container-x pb-8">
-        {categories.length === 0 ? (
-          <p className="border-t border-line py-10 text-muted-foreground">Teknoloji listesi yakında yayınlanacak.</p>
-        ) : (
-          <div className="border-t border-line">
-            {categories.map((cat) => (
-              <section key={cat} className="grid gap-6 border-b border-line py-10 md:grid-cols-12 md:gap-10">
-                <div className="md:col-span-4">
-                  <h2 className="text-h3 text-ink">{technologyCategoryLabels[cat]}</h2>
-                  <p className="mt-2 text-muted-foreground">{categoryNotes[cat]}</p>
-                </div>
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:col-span-8">
-                  {groups[cat]!.map((t) => (
-                    <li
-                      key={t.id}
-                      className="flex min-h-16 items-center rounded-md border border-line bg-white px-4 font-semibold text-ink transition-colors hover:border-teal"
-                    >
-                      {t.name}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )}
+      <section className="page-body">
+        <div className="landing-shell">
+          {categories.length === 0 ? (
+            <p className="landing-empty">Teknoloji listesi yakında yayınlanacak.</p>
+          ) : (
+            <div>
+              {categories.map((cat) => (
+                <section key={cat} className="grid gap-6 border-t border-[#e0e3ee] py-10 first:border-t-0 md:grid-cols-12 md:gap-10">
+                  <div className="md:col-span-4">
+                    <h2 className="text-[1.3rem] tracking-[-0.02em] text-[#171922]">{technologyCategoryLabels[cat]}</h2>
+                    <p className="mt-2 text-[14px] leading-relaxed text-[#646a7c]">{categoryNotes[cat]}</p>
+                  </div>
+                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:col-span-8">
+                    {groups[cat]!.map((t) => (
+                      <li key={t.id} className="landing-tech-item">
+                        {t.name}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       <CtaBand

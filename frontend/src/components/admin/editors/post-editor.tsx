@@ -12,16 +12,15 @@ import { adminApi, errorMessage, unwrap } from "@/lib/api/browser";
 import type { AdminCategory, AiGenerateResult, Media } from "@/lib/api/types";
 import { DeleteButton, ErrorState, LoadingState, PageHeader, SubmitBar } from "../ui";
 import { Field, Section, Toggle, inputClass } from "../form";
-import { MarkdownEditor, SeoFields } from "../fields";
+import RichTextEditor from "../editor/rich-text-editor";
 import { MediaPicker } from "../media-picker";
 import { DateTimePicker, MultiSelect, SelectField } from "../controls";
 import { useContentMutation } from "../use-save";
-import { orNull, seoSchema, slugSchema } from "./common";
+import { orNull, slugSchema } from "./common";
 import { PostStatusBadge, postStateOf } from "./post-status";
 import { AiGenerateDialog, AiRewriteMenu } from "../blog/ai-tools";
 import { CategoryDialog, categoriesKey, tagsKey } from "../blog/taxonomy-dialogs";
 import { actionVariants } from "@/components/site/action-link";
-import { siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type PublishMode = "draft" | "now" | "schedule";
@@ -39,7 +38,6 @@ const schema = z
     isFeatured: z.boolean(),
     publishMode: z.enum(["draft", "now", "schedule"]),
     scheduledAt: z.string(),
-    ...seoSchema,
   })
   .superRefine((v, ctx) => {
     if (v.publishMode === "draft") return;
@@ -54,7 +52,7 @@ type Values = z.infer<typeof schema>;
 
 const empty: Values = {
   version: null, title: "", slug: "", excerpt: "", bodyMarkdown: "", coverImageId: null, categoryId: null, tagIds: [],
-  isFeatured: false, publishMode: "draft", scheduledAt: "", seoTitle: "", seoDescription: "",
+  isFeatured: false, publishMode: "draft", scheduledAt: "",
 };
 
 const listKey = ["admin", "posts"];
@@ -103,7 +101,6 @@ export function PostEditor({ id }: { id: string | null }) {
         categoryId: p.categoryId, tagIds: [...p.tagIds], isFeatured: p.isFeatured,
         publishMode: state === "draft" ? "draft" : state === "scheduled" ? "schedule" : "now",
         scheduledAt: state === "scheduled" && p.publishedAt ? format(new Date(p.publishedAt), "yyyy-MM-dd'T'HH:mm") : "",
-        seoTitle: p.seoTitle ?? "", seoDescription: p.seoDescription ?? "",
       });
     }
   }, [query.data, reset, formState.isDirty]);
@@ -139,8 +136,9 @@ export function PostEditor({ id }: { id: string | null }) {
         status: v.publishMode === "draft" ? ("Draft" as const) : ("Published" as const),
         // "Hemen": ilk yayın tarihi korunur; "Planla": seçilen ileri tarih.
         publishedAt: v.publishMode === "schedule" ? new Date(v.scheduledAt).toISOString() : v.publishMode === "now" ? published : null,
-        seoTitle: orNull(v.seoTitle),
-        seoDescription: orNull(v.seoDescription),
+        // Panel artık SEO alanlarını göstermiyor; var olan değerler korunur.
+        seoTitle: query.data?.seoTitle ?? null,
+        seoDescription: query.data?.seoDescription ?? null,
       };
       return id
         ? unwrap(adminApi.PUT("/api/v1/admin/posts/{id}", { params: { path: { id } }, body }))
@@ -179,8 +177,6 @@ export function PostEditor({ id }: { id: string | null }) {
     if (r.title) setValue("title", r.title, opts);
     if (r.excerpt) setValue("excerpt", r.excerpt, opts);
     if (r.content) setValue("bodyMarkdown", r.content, opts);
-    if (r.seoTitle) setValue("seoTitle", r.seoTitle, opts);
-    if (r.seoDescription) setValue("seoDescription", r.seoDescription, opts);
     if (r.cover) {
       setCoverPreview({ id: r.cover.id, url: r.cover.url, altText: r.cover.altText });
       setValue("coverImageId", r.cover.id, opts);
@@ -205,9 +201,6 @@ export function PostEditor({ id }: { id: string | null }) {
   if (id && (query.isError || !query.data)) return <ErrorState message="Yazı bulunamadı." />;
 
   const publishMode = watch("publishMode");
-  const slug = watch("slug");
-  const seoTitle = watch("seoTitle") || title;
-  const seoDescription = watch("seoDescription") || watch("excerpt");
 
   return (
     <form onSubmit={handleSubmit((v) => save.mutateAsync(v))} noValidate>
@@ -247,19 +240,21 @@ export function PostEditor({ id }: { id: string | null }) {
                   }}
                 />
               </div>
-              <MarkdownEditor id="bodyMarkdown" rows={26} value={watch("bodyMarkdown")} error={errors.bodyMarkdown?.message} textareaProps={register("bodyMarkdown")} />
+              <Controller
+                control={control}
+                name="bodyMarkdown"
+                render={({ field }) => (
+                  <RichTextEditor
+                    id="bodyMarkdown"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Yazının gövdesini yazın…"
+                    label="İçerik"
+                  />
+                )}
+              />
+              {errors.bodyMarkdown && <p className="mt-1.5 text-sm text-destructive">{errors.bodyMarkdown.message}</p>}
             </div>
-          </Section>
-
-          <Section title="Arama motoru (SEO)" description="Google sonuçlarında nasıl görüneceğinin önizlemesi.">
-            <div aria-hidden className="rounded-lg border border-line bg-white p-4">
-              <p className="truncate text-xs text-[#4d5156]">
-                {siteUrl.replace(/^https?:\/\//, "")} › blog › {slug || "yazi-adresi"}
-              </p>
-              <p className="mt-1 truncate text-lg leading-snug text-[#1a0dab]">{seoTitle ? `${seoTitle.slice(0, 60)}${seoTitle.length > 60 ? "…" : ""}` : "Yazı başlığı"}</p>
-              <p className="mt-1 line-clamp-2 text-sm text-[#4d5156]">{seoDescription || "Arama sonuçlarında görünecek açıklama."}</p>
-            </div>
-            <SeoFields register={register} watch={watch} errors={errors} />
           </Section>
         </div>
 
