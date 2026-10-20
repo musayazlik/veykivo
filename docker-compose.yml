@@ -10,6 +10,8 @@ services:
       ConnectionStrings__Default: ${DB_CONNECTION}
       Seed__AdminEmail: ${ADMIN_EMAIL}
       Seed__AdminPassword: ${ADMIN_PASSWORD}
+      Seed__DemoEmail: ${DEMO_EMAIL:-}
+      Seed__DemoPassword: ${DEMO_PASSWORD:-}
       Database__MigrateOnStartup: "true"
       Security__SecureCookies: "false"
       # --profile full'da web container'ı proxy görevi görür; gerçek istemci IP'si (rate limit)

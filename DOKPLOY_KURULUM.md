@@ -22,6 +22,7 @@ HTTPS alan adı → Dokploy / Traefik → web:3000 → api:8080 → postgres:543
 - `POSTGRES_PASSWORD`: Veritabanı parolası. Örneğin `openssl rand -hex 24` çıktısını kullanabilirsiniz; bu biçim bağlantı metni ve ortam değişkeni kaçış sorunlarını önler.
 - `ADMIN_EMAIL`: İlk yönetici hesabının e-posta adresi.
 - `ADMIN_PASSWORD`: En az 10 karakter; büyük harf, küçük harf ve rakam içeren güçlü bir parola.
+- `DEMO_EMAIL` / `DEMO_PASSWORD` (isteğe bağlı): Paneldeki her şeyi görebilen ama değişiklik yapamayan demo hesabı. İkisi de doluysa ilk açılışta oluşturulur; bilgiler paylaşılacağı için hatalı denemelerle kilitlenmez. Parola en az 10 karakter olmalı ve büyük harf, küçük harf ve rakam içermelidir.
 - `SEED_SAMPLE_CONTENT`: İlk açılışta örnek içerik isteniyorsa `true`; boş site isteniyorsa `false`.
 - `OPENROUTER_API_KEY`: Yapay zekâ özellikleri kullanılacaksa doldurun.
 - `SMTP_*`: Bildirim e-postaları için sağlayıcınızın bilgilerini girin. Panelde site ayarlarından bildirim alacak e-posta adresini de belirleyin.

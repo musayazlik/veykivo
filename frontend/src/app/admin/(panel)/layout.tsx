@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AdminSidebar, AdminSidebarFallback } from "@/components/admin/sidebar";
+import { DemoBanner } from "@/components/admin/demo-banner";
 
 /**
  * Panel düzeni: URL'ye bağlı kenar çubuğu kendi Suspense sınırında çözülür,
@@ -13,7 +14,10 @@ export default function PanelLayout({ children }: LayoutProps<"/admin">) {
         <AdminSidebar />
       </Suspense>
       <div className="min-w-0 pt-14 lg:pt-0">
-        <main className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">{children}</main>
+        <main className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
+          <DemoBanner />
+          {children}
+        </main>
       </div>
     </div>
   );

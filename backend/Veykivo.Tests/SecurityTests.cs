@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Veykivo.Api.Infrastructure;
+using Veykivo.Application.Contracts;
 using Veykivo.Infrastructure.Identity;
 
 namespace Veykivo.Tests;
@@ -35,6 +36,48 @@ public sealed class SecurityTests
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsJsonAsync("/api/v1/admin/technologies",
             new { name = "Rejected", category = "Backend", sortOrder = 0, isPublished = true })).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/v1/auth/me")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Demo_account_can_read_panel_but_cannot_write()
+    {
+        using var app = new TestApp();
+        using var client = await app.CreateDemoClientAsync();
+
+        var me = await client.GetFromJsonAsync<CurrentUserDto>("/api/v1/auth/me");
+        Assert.Equal([Roles.Demo], me!.Roles);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/admin/dashboard")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/admin/inquiries")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/admin/site-settings")).StatusCode);
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/v1/admin/technologies",
+            new { name = "Rejected", category = "Backend", sortOrder = 0, isPublished = true })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PutAsJsonAsync("/api/v1/admin/site-settings",
+            new Dictionary<string, string> { ["company.name"] = "Değişti" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.DeleteAsync($"/api/v1/admin/posts/{Guid.NewGuid()}")).StatusCode);
+
+        // Çıkış panel grubunun dışında; demo hesabı da oturumunu kapatabilmeli.
+        Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync("/api/v1/auth/logout", null)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Demoted_admin_cannot_write_with_existing_session()
+    {
+        using var app = new TestApp();
+        using var client = await app.CreateAdminClientAsync();
+        using (var scope = app.Services.CreateScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            await roles.CreateAsync(new IdentityRole<Guid>(Roles.Demo));
+            var user = (await users.FindByEmailAsync(TestApp.AdminEmail))!;
+            Assert.True((await users.AddToRoleAsync(user, Roles.Demo)).Succeeded);
+            Assert.True((await users.RemoveFromRoleAsync(user, Roles.Admin)).Succeeded);
+        }
+
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/admin/dashboard")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/v1/admin/technologies",
+            new { name = "Rejected", category = "Backend", sortOrder = 0, isPublished = true })).StatusCode);
     }
 
     [Fact]

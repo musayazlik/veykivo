@@ -15,7 +15,7 @@ public static class SessionValidation
 
         var users = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
         var user = await users.GetUserAsync(context.Principal);
-        if (user is { IsActive: true } && await users.IsInRoleAsync(user, Roles.Admin)) return;
+        if (user is { IsActive: true } && await users.HasPanelRoleAsync(user)) return;
 
         context.RejectPrincipal();
         await context.HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);

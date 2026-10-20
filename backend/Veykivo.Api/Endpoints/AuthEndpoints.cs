@@ -47,7 +47,7 @@ public static class AuthEndpoints
             detail: "E-posta veya parola hatalı.");
 
         var user = await users.FindByEmailAsync(request.Email.Trim());
-        if (user is null || !user.IsActive || !await users.IsInRoleAsync(user, Roles.Admin))
+        if (user is null || !user.IsActive || !await users.HasPanelRoleAsync(user))
             return invalid;
 
         var result = await signIn.PasswordSignInAsync(user, request.Password, isPersistent: true, lockoutOnFailure: true);

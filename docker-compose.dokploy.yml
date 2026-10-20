@@ -27,6 +27,8 @@ services:
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=veykivo;Username=veykivo;Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD tanimlanmali}"
       Seed__AdminEmail: ${ADMIN_EMAIL:?ADMIN_EMAIL tanimlanmali}
       Seed__AdminPassword: ${ADMIN_PASSWORD:?ADMIN_PASSWORD tanimlanmali}
+      Seed__DemoEmail: ${DEMO_EMAIL:-}
+      Seed__DemoPassword: ${DEMO_PASSWORD:-}
       Seed__SampleContent: ${SEED_SAMPLE_CONTENT:-true}
       Database__MigrateOnStartup: "true"
       Security__SecureCookies: "true"

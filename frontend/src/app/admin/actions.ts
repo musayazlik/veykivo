@@ -8,7 +8,8 @@ type ContentTag = (typeof contentTags)[keyof typeof contentTags];
 
 /**
  * Panelde yapılan değişikliklerden sonra public sitenin önbelleğini tazeler.
- * Herkese açık bir Server Action olduğu için çağıranın oturumu API'de doğrulanır.
+ * Herkese açık bir Server Action olduğu için çağıranın oturumu API'de doğrulanır;
+ * salt okunur demo hesabı içerik değiştiremediği için önbelleği de tazeleyemez.
  */
 export async function revalidateContent(tags: ContentTag[]) {
   const cookieHeader = (await cookies()).toString();
@@ -17,6 +18,8 @@ export async function revalidateContent(tags: ContentTag[]) {
     cache: "no-store",
   });
   if (!res.ok) return { ok: false };
+  const me = (await res.json()) as { roles?: string[] };
+  if (!me.roles?.includes("Admin")) return { ok: false };
 
   const allowed = new Set<string>(Object.values(contentTags));
   for (const tag of tags) if (allowed.has(tag)) updateTag(tag);

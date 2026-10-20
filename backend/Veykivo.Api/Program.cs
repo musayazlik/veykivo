@@ -69,7 +69,7 @@ builder.Services.ConfigureApplicationCookie(o =>
 });
 
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(AuthPolicies.Admin, p => p.RequireAuthenticatedUser().RequireRole(Roles.Admin));
+    .AddPolicy(AuthPolicies.Panel, p => p.RequireAuthenticatedUser().RequireRole(Roles.Admin, Roles.Demo));
 
 builder.Services.AddAntiforgery(o =>
 {

@@ -56,27 +56,43 @@ public sealed class TestApp : WebApplicationFactory<Program>
         await db.SaveChangesAsync();
     }
 
-    public async Task EnsureAdminAsync()
+    public const string DemoEmail = "demo@test.local";
+
+    public Task EnsureAdminAsync() => EnsureUserAsync(AdminEmail, Roles.Admin);
+
+    private async Task EnsureUserAsync(string email, string role)
     {
         using var scope = Services.CreateScope();
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        if (!await roles.RoleExistsAsync(Roles.Admin)) await roles.CreateAsync(new IdentityRole<Guid>(Roles.Admin));
-        if (await users.FindByEmailAsync(AdminEmail) is not null) return;
-        var user = new AppUser { UserName = AdminEmail, Email = AdminEmail, EmailConfirmed = true };
+        if (!await roles.RoleExistsAsync(role)) await roles.CreateAsync(new IdentityRole<Guid>(role));
+        if (await users.FindByEmailAsync(email) is not null) return;
+        var user = new AppUser { UserName = email, Email = email, EmailConfirmed = true };
         var result = await users.CreateAsync(user, AdminPassword);
         Assert.True(result.Succeeded, string.Join(", ", result.Errors.Select(e => e.Description)));
-        await users.AddToRoleAsync(user, Roles.Admin);
+        await users.AddToRoleAsync(user, role);
     }
 
     /// <summary>CSRF token'ı alıp giriş yapar ve oturum sonrası yenilenmiş token'ı istemciye ekler.</summary>
     public async Task<HttpClient> CreateAdminClientAsync()
     {
         await EnsureAdminAsync();
+        return await LoginAsync(AdminEmail);
+    }
+
+    /// <summary>Salt okunur Demo rolündeki hesapla oturum açmış istemci.</summary>
+    public async Task<HttpClient> CreateDemoClientAsync()
+    {
+        await EnsureUserAsync(DemoEmail, Roles.Demo);
+        return await LoginAsync(DemoEmail);
+    }
+
+    private async Task<HttpClient> LoginAsync(string email)
+    {
         var client = CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
 
         await SetCsrfAsync(client);
-        var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email = AdminEmail, password = AdminPassword });
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = AdminPassword });
         login.EnsureSuccessStatusCode();
         await SetCsrfAsync(client);
         return client;

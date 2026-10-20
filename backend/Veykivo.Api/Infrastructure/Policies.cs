@@ -2,7 +2,8 @@ namespace Veykivo.Api.Infrastructure;
 
 public static class AuthPolicies
 {
-    public const string Admin = "AdminOnly";
+    /// <summary>Admin ve Demo rolleri; Demo'nun yazma istekleri ayrıca <see cref="ReadOnlyDemoFilter"/> ile reddedilir.</summary>
+    public const string Panel = "PanelAccess";
 }
 
 public static class RateLimitPolicies

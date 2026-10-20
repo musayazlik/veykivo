@@ -1,6 +1,8 @@
 using System.Text.Json;
 using FluentValidation;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Identity;
+using Veykivo.Infrastructure.Identity;
 
 namespace Veykivo.Api.Infrastructure;
 
@@ -43,6 +45,30 @@ public sealed class AntiforgeryFilter(IAntiforgery antiforgery) : IEndpointFilte
                 detail: "Oturum güvenlik anahtarı geçersiz veya süresi dolmuş. Sayfayı yenileyip tekrar deneyin.");
         }
         return await next(ctx);
+    }
+}
+
+/// <summary>
+/// Demo hesabı paneli gezebilir; durum değiştiren istekler yalnız Admin rolüne açıktır.
+/// Rol, cookie'deki claim yerine veritabanından okunur: rolü düşürülen hesap oturum yenilenmeden yazamasın.
+/// </summary>
+public sealed class ReadOnlyDemoFilter : IEndpointFilter
+{
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
+    {
+        var method = ctx.HttpContext.Request.Method;
+        if (HttpMethods.IsGet(method) || HttpMethods.IsHead(method) || HttpMethods.IsOptions(method))
+            return await next(ctx);
+
+        // Filtre kök sağlayıcıdan oluşturulur; scoped UserManager istek kapsamından alınmalı.
+        var users = ctx.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+        var user = await users.GetUserAsync(ctx.HttpContext.User);
+        if (user is not null && await users.IsInRoleAsync(user, Roles.Admin))
+            return await next(ctx);
+
+        return Results.Problem(statusCode: StatusCodes.Status403Forbidden,
+            title: "Demo hesabı salt okunurdur.",
+            detail: "Demo hesabıyla değişiklik yapılamaz; paneli yalnızca inceleyebilirsiniz.");
     }
 }
 

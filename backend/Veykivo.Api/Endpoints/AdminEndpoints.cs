@@ -15,7 +15,8 @@ public static class AdminEndpoints
     {
         var admin = app.MapGroup("/api/v1/admin")
             .WithTags("Admin")
-            .RequireAuthorization(AuthPolicies.Admin)
+            .RequireAuthorization(AuthPolicies.Panel)
+            .AddEndpointFilter<ReadOnlyDemoFilter>()
             .AddEndpointFilter<AntiforgeryFilter>();
 
         admin.MapGet("/dashboard", (DashboardService s, CancellationToken ct) => s.GetDashboardAsync(ct))

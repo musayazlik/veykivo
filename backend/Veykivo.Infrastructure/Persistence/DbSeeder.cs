@@ -32,27 +32,39 @@ public sealed class DbSeeder(
 
     private async Task SeedAdminAsync()
     {
-        if (!await roles.RoleExistsAsync(Roles.Admin))
-            await roles.CreateAsync(new IdentityRole<Guid>(Roles.Admin));
+        foreach (var role in new[] { Roles.Admin, Roles.Demo })
+            if (!await roles.RoleExistsAsync(role))
+                await roles.CreateAsync(new IdentityRole<Guid>(role));
 
-        var email = config["Seed:AdminEmail"];
-        var password = config["Seed:AdminPassword"];
+        await SeedUserAsync("Admin", Roles.Admin, "Yönetici", lockoutEnabled: true);
+        // Demo bilgileri herkese açık paylaşılır; kilitlenebilseydi herkes 5 hatalı denemeyle hesabı kapatabilirdi.
+        await SeedUserAsync("Demo", Roles.Demo, "Demo kullanıcı", lockoutEnabled: false);
+    }
+
+    /// <summary>Seed:{prefix}Email / Seed:{prefix}Password tanımlıysa ve hesap yoksa oluşturur.</summary>
+    private async Task SeedUserAsync(string prefix, string role, string displayName, bool lockoutEnabled)
+    {
+        var email = config[$"Seed:{prefix}Email"];
+        var password = config[$"Seed:{prefix}Password"];
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            logger.LogInformation("Seed:AdminEmail/Seed:AdminPassword tanımlı değil; admin hesabı oluşturulmadı.");
+            logger.LogInformation("Seed:{Prefix}Email/Password tanımlı değil; {Role} hesabı oluşturulmadı.", prefix, role);
             return;
         }
         if (await users.FindByEmailAsync(email) is not null) return;
 
-        var user = new AppUser { UserName = email, Email = email, EmailConfirmed = true, DisplayName = "Yönetici" };
+        var user = new AppUser
+        {
+            UserName = email, Email = email, EmailConfirmed = true, DisplayName = displayName, LockoutEnabled = lockoutEnabled,
+        };
         var result = await users.CreateAsync(user, password);
         if (!result.Succeeded)
         {
-            logger.LogError("Admin hesabı oluşturulamadı: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
+            logger.LogError("{Role} hesabı oluşturulamadı: {Errors}", role, string.Join("; ", result.Errors.Select(e => e.Description)));
             return;
         }
-        await users.AddToRoleAsync(user, Roles.Admin);
-        logger.LogInformation("Admin hesabı oluşturuldu: {Email}", email);
+        await users.AddToRoleAsync(user, role);
+        logger.LogInformation("{Role} hesabı oluşturuldu: {Email}", role, email);
     }
 
     private MediaAsset Img(string url, string alt) =>
