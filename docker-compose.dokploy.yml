@@ -1,0 +1,69 @@
+# Dokploy: Docker Compose türü ve Isolated Deployments açık olmalıdır.
+# Alan adı yalnız web servisine, container portu 3000'e bağlanır.
+# Değişkenler için .env.dokploy.example, kurulum için DOKPLOY_KURULUM.md.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: veykivo
+      POSTGRES_USER: veykivo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD tanimlanmali}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veykivo -d veykivo"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=veykivo;Username=veykivo;Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD tanimlanmali}"
+      Seed__AdminEmail: ${ADMIN_EMAIL:?ADMIN_EMAIL tanimlanmali}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?ADMIN_PASSWORD tanimlanmali}
+      Seed__SampleContent: ${SEED_SAMPLE_CONTENT:-true}
+      Database__MigrateOnStartup: "true"
+      Security__SecureCookies: "true"
+      # ASP.NET Core listeleri indeksli ortam değişkenleriyle doldurulur.
+      # Dağıtımdan sonra Dokploy ağının gerçek CIDR değerine daraltın.
+      ForwardedHeaders__KnownNetworks__0: ${FORWARD_NETWORK_CIDR:-172.16.0.0/12}
+      ForwardedHeaders__ForwardLimit: "2"
+      OpenRouter__ApiKey: ${OPENROUTER_API_KEY:-}
+      Smtp__Host: ${SMTP_HOST:-}
+      Smtp__Port: ${SMTP_PORT:-587}
+      Smtp__Username: ${SMTP_USERNAME:-}
+      Smtp__Password: ${SMTP_PASSWORD:-}
+      Smtp__From: ${SMTP_FROM:-no-reply@veykivo.com}
+    volumes:
+      - api-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:8080
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL:?SITE_URL tanimlanmali}
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:?SITE_URL tanimlanmali}
+    expose:
+      - "3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  api-data:

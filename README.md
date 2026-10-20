@@ -44,6 +44,14 @@ docker run --rm -v "$PWD/backend:/src" -v veykivo-nuget:/root/.nuget/packages -v
 cd frontend && npx openapi-typescript http://127.0.0.1:5080/openapi/v1.json -o src/lib/api/schema.d.ts
 ```
 
+## Dokploy'a dağıtım
+
+Adım adım kurulum: [DOKPLOY_KURULUM.md](DOKPLOY_KURULUM.md).
+
+- Compose dosyası: `docker-compose.dokploy.yml` (web + API + PostgreSQL).
+- Ortam değişkeni örneği: `.env.dokploy.example`; gerçek değerleri Dokploy'un **Environment** bölümüne girin.
+- **Isolated Deployments** açık olmalı; HTTPS alan adını `web` servisine, container portu `3000`'e bağlayın.
+
 ## Mimari kararlar
 
 - **Aynı origin:** Tarayıcı API'ye Next.js rewrite'ı (`/api/v1/*`, `/uploads/*`) üzerinden erişir. Oturum ASP.NET Core Identity'nin HttpOnly ve `SameSite=Strict` cookie'sinde taşınır, ayrı bir frontend auth çözümü yoktur.
